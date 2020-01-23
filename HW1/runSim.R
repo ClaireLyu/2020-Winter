@@ -21,8 +21,27 @@ estMeanPrimes = function (x) {
   return (mean(x[ind]))
 }
 
-# simulate data
-x = rnorm(n)
+#set seed for random number generation
+set.seed(seed)
+
+for (r in 1:rep) {
+  if (dist == "gaussian"){
+    # simulate data
+    x = rnorm(n)
+  } else if(dist == "t1"){
+    x = rt(n, df = 1)
+  } else if(dist == "t5"){
+    x = rt(n, df = 5)
+  } else {
+    stop("Unrecognized distribution")
+  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msePrimeAvg + estMeanPrimes(x)^2
+}
+
+print(mseSampAvg / rep)
+print(msePrimeAvg / rep)
 
 # estimate mean
 estMeanPrimes(x)
