@@ -98,7 +98,7 @@ Display the number of lines in each `csv` file.
     ```
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
 
-0. What's the difference between the following two commands?
+2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
     echo 'hello, world' > test1.txt
     ```
@@ -106,8 +106,9 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     ```{bash eval=FALSE}
     echo 'hello, world' >> test2.txt
     ```
+**Solution** The first command directs the output string 'hello,world' into a new file named 'test1.txt'. The second command appends the string 'hello,world' into the existing file named 'test2.txt'.
 
-0. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
+3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
     #!/bin/sh
     # Select lines from the middle of a file.
