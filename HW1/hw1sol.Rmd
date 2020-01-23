@@ -63,13 +63,32 @@ Display the number of lines in each `csv` file.
     
 4. Display the first few lines of `ADMISSIONS.csv`. How many rows are in this data file? How many unique patients (identified by `SUBJECT_ID`) are in this data file? What are the possible values taken by each of the variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`? How many (unique) patients are Hispanic? (Hint: combine Linux comamnds `head`, `tail`, `awk`, `uniq`, `wc`, `sort` and so on using pipe.)
 
-**Solution** Let's display the first 10 lines of `ADMISSIONS.csv`. There are 58977 rows in this data file. There are 47106 unique patients.
+**Solution** Let's display the first 10 lines of `ADMISSIONS.csv`.  
     ```{bash}
     head /home/203bdata/mimic-iii/ADMISSIONS.csv
-    wc -l /home/203bdata/mimic-iii/ADMISSIONS.csv
-    awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | uniq | tail -n+2 | wc -l
-    awk -F, '{ print $10, $11, $12, $13, $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | head
     ```
+**Solution** There are 58977 rows in this data file.
+    ```{bash}
+    wc -l /home/203bdata/mimic-iii/ADMISSIONS.csv
+    ```
+**Solution** There are 47106 unique patients.
+    ```{bash}
+    awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | uniq | wc -l
+    ```
+**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`.
+    ```{bash}
+    awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    awk -F, '{ print $13 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    ```
+**Solution** There are 2128 Hispanic patients. 
+    ```{bash}
+    awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | grep 'HISPANIC' | wc -l
+    ```
+    
+
     
 ## Q3. More fun with shell
 
