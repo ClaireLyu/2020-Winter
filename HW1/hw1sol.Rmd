@@ -71,9 +71,9 @@ Display the number of lines in each `csv` file.
     ```{bash}
     wc -l /home/203bdata/mimic-iii/ADMISSIONS.csv
     ```
-**Solution** There are 47106 unique patients.
+**Solution** There are 46520 unique patients.
     ```{bash}
-    awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | uniq | wc -l
+    awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq | wc -l
     ```
 **Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`.
     ```{bash}
@@ -83,9 +83,9 @@ Display the number of lines in each `csv` file.
     awk -F, '{ print $13 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
     awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
     ```
-**Solution** There are 2128 Hispanic patients. 
+**Solution** There are 1652 unique Hispanic patients. 
     ```{bash}
-    awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | grep 'HISPANIC' | wc -l
+    grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | awk -F, '{ print $2 }' | sort | uniq | wc -l
     ```
     
 
