@@ -115,6 +115,7 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     # Usage: bash middle.sh filename end_line num_lines
     head -n "$2" "$1" | tail -n "$3"
     ```
+    
 Using `chmod` make the file executable by the owner, and run 
     ```{bash eval=FALSE}
     ./middle.sh pride_and_prejudice.txt 20 5
