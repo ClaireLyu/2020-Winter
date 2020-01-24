@@ -159,9 +159,7 @@ for both methods.
 
 **Solution** This is my 'autoSim.R' code.
     ```{bash}
-    Rscript autoSim.R
-    cat n100distgaussian.txt
-    cat n100distt1.txt
+    cat autoSim.R
     ```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
@@ -179,4 +177,7 @@ for both methods.
 | 500 | PrimeAvg |       |       |          |
 | 500 | SampAvg  |       |       |          |
 
-
+**Solution** Below is the resulting table.
+    ```{bash}
+    Rscript datClt.R
+    ```
