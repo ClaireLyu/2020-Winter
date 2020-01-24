@@ -121,7 +121,7 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     ```{bash eval=FALSE}
     echo 'hello, world' >> test2.txt
     ```
-**Solution** The first command directs the string 'hello, world' into the file named 'test1.txt'. If the file has already existed, the contents will be replaced by 'hello, world'. The second command appends the string 'hello,world' into the file named 'test2.txt'. If this file has already existed, 'hello, world' will be added to the file instead of replacing the original contents as the first command.
+**Solution** The first command directs the string 'hello, world' into the file named 'test1.txt'. If the file has already existed, the contents will be replaced by 'hello, world'. The second command appends the string 'hello,world' into the file named 'test2.txt'. If this file has already existed, 'hello, world' will be added to the file following the original contents instead of replacing them as the first command.
 
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
