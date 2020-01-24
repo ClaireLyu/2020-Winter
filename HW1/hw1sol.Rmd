@@ -77,7 +77,7 @@ Display the number of lines in each `csv` file.
     ```
 **Solution** There are 58977 rows in this data file.
     ```{bash}
-    wc -l /home/203bdata/mimic-iii/ADMISSIONS.csv <
+    wc -l < /home/203bdata/mimic-iii/ADMISSIONS.csv
     ```
 **Solution** There are 46520 unique patients.
     ```{bash}
@@ -131,7 +131,7 @@ Using `chmod` make the file executable by the owner, and run
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
 **Solution** A number with a dollar sign ahead refers to the location of the variable in the command line. "$1" refers to 'pride_and_prejudice.txt'; "$2" refers to '20'; and "$3" refers to '5'. So, in all, we first select the first 20 lines from 'pride_and_prejudice.txt' and from those 20 lines, we select the last 5 lines.
-We need the first line of the shell script to inform that we are using 'sh' as shell. 
+We need the first line of the shell script to inform that we are using 'sh' as shell, indicating the interpretation of the scripts.
 
 ## Q4. R Batch Run
 
