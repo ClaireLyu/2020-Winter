@@ -27,7 +27,7 @@ set.seed(seed)
 mseSampAvg = 0
 msePrimeAvg = 0
 
-for (r in 1:rep) {
+for (r in 1:reps) {
   if (dist == "gaussian"){
     # simulate data
     x = rnorm(n)
@@ -43,5 +43,5 @@ for (r in 1:rep) {
   msePrimeAvg = msePrimeAvg + estMeanPrimes(x)^2
 }
 
-print(mseSampAvg / rep)
-print(msePrimeAvg / rep)
+print(mseSampAvg / reps)
+print(msePrimeAvg / reps)
