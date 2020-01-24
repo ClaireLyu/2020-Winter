@@ -24,6 +24,9 @@ estMeanPrimes = function (x) {
 #set seed for random number generation
 set.seed(seed)
 
+mseSampAvg = 0
+msePrimeAvg = 0
+
 for (r in 1:rep) {
   if (dist == "gaussian"){
     # simulate data
@@ -42,6 +45,3 @@ for (r in 1:rep) {
 
 print(mseSampAvg / rep)
 print(msePrimeAvg / rep)
-
-# estimate mean
-estMeanPrimes(x)
