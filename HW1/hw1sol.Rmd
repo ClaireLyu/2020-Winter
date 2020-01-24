@@ -132,6 +132,11 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     ```
     
 Using `chmod` make the file executable by the owner, and run 
+    ```{bash, eval=FALSE}
+    ./middle.sh pride_and_prejudice.txt 20 5
+    ```
+    
+**Solution** 
     ```{bash}
     ./middle.sh pride_and_prejudice.txt 20 5
     ```
@@ -177,8 +182,10 @@ for both methods.
 | 500 | PrimeAvg |       |       |          |
 | 500 | SampAvg  |       |       |          |
 
-**Solution** Below are the R script that collects results from output files and the resulting table.
+**Solution** Below are the R script that collects results from output files and its resulting table.
     ```{bash}
     cat datClt.R
+    ```
+    ```{bash}
     Rscript datClt.R
     ```
