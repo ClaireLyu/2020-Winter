@@ -105,8 +105,9 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     and
     ```{bash eval=FALSE}
     echo 'hello, world' >> test2.txt
+    cat test2.txt
     ```
-**Solution** The first command directs the output string 'hello,world' into a new file named 'test1.txt'. The second command appends the string 'hello,world' into the existing file named 'test2.txt'.
+**Solution** The first command directs the string 'hello, world' into the file named 'test1.txt'. If the file has already existed, the contents will be replaced by 'hello, world'. The second command appends the string 'hello,world' into the file named 'test2.txt'. If this file has already existed, 'hello, world' will be added to the file instead of replacing the original contents as the first command.
 
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
@@ -117,10 +118,12 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     ```
     
 Using `chmod` make the file executable by the owner, and run 
-    ```{bash eval=FALSE}
+    ```{bash}
     ./middle.sh pride_and_prejudice.txt 20 5
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
+**Solution** A number with a dollar sign ahead refers to the location of the variable in the command line. "$1" refers to 'pride_and_prejudice.txt'; "$2" refers to '20'; and "$3" refers to '5'. So, in all, we first select the first 20 lines from 'pride_and_prejudice.txt' and from those 20 lines, we select the last 5 lines.
+We need the first line of the shell script to inform that we are using 'sh' as shell. 
 
 ## Q4. R Batch Run
 
@@ -138,6 +141,11 @@ for both methods.
     ```
     
 2. Modify the [`autoSim.R`](https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 203`. 
+
+**Solution** The following is my output of calling runSim.R by using `rep = 50`, and `seed = 203`.
+    ```{bash}
+    Rscript autoSim.R
+    ```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
