@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 </p>
 
 2. The `/home/203bdata/mimic-iii/` folder on teaching server contains data sets from MIMIC-III. See <https://mimic.physionet.org/mimictables/admissions/> for details of each table.  
-    ```{bash}
+    ```{bash, eval = FALSE}
     ls -l /home/203bdata/mimic-iii
     ```
 Please, do **not** put these data files into Git; they are big. Also do **not** copy them into your directory. Just read from the data folder `/home/203bdata/mimic-iii` directly in following exercises. 
@@ -83,7 +83,7 @@ Display the number of lines in each `csv` file.
     ```{bash}
     awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq | wc -l
     ```
-**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`.
+**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY` in the order.
     ```{bash}
     awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
     awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
@@ -105,6 +105,11 @@ Display the number of lines in each `csv` file.
     curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
     ```
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+    ```{bash}
+    for name in Elizabeth Jane Lydia Darcy
+      do grep -o -i $name pride_and_prejudice.txt | wc -l
+    done
+    ```
 
 2. What's the difference between the following two commands?
     ```{bash eval=FALSE}
@@ -153,6 +158,8 @@ for both methods.
 **Solution** This is my 'autoSim.R' code.
     ```{bash}
     Rscript autoSim.R
+    cat n100distgaussian.txt
+    cat n100distt1.txt
     ```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
