@@ -13,5 +13,3 @@ for (d in 1:3) {
     print(paste("sysCall=", sysCall, sep = ""))
   }
 }
-
-
