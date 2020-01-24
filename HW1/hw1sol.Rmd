@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 </p>
 
 2. The `/home/203bdata/mimic-iii/` folder on teaching server contains data sets from MIMIC-III. See <https://mimic.physionet.org/mimictables/admissions/> for details of each table.  
-    ```{bash, eval = FALSE}
+    ```{bash}
     ls -l /home/203bdata/mimic-iii
     ```
 Please, do **not** put these data files into Git; they are big. Also do **not** copy them into your directory. Just read from the data folder `/home/203bdata/mimic-iii` directly in following exercises. 
@@ -83,12 +83,24 @@ Display the number of lines in each `csv` file.
     ```{bash}
     awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq | wc -l
     ```
-**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY` in order.
+**Solution** Below are the lists of all possible values taken by variable `INSURANCE`.
     ```{bash}
     awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    ```
+**Solution** Below are the lists of all possible values taken by variable `LANGUAGE`.
+    ```{bash}
     awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    ```
+**Solution** Below are the lists of all possible values taken by variable `RELIGION`.  
+    ```{bash}
     awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    ```
+**Solution** Below are the lists of all possible values taken by variable `MARITAL_STATUS`.  
+    ```{bash}
     awk -F, '{ print $13 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
+    ```
+**Solution** Below are the lists of all possible values taken by variable `ETHNICITY`.  
+    ```{bash}
     awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
     ```
 **Solution** There are 1652 unique Hispanic patients. 
@@ -142,7 +154,7 @@ Using `chmod` make the file executable by the owner, and run
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Solution** A number with a dollar sign ahead refers to the location of the variable in the command line. "$1" refers to 'pride_and_prejudice.txt'; "$2" refers to '20'; and "$3" refers to '5'. So, in all, we first select the first 20 lines from 'pride_and_prejudice.txt' and from those 20 lines, we select the last 5 lines.
+**Solution** A number with a dollar sign ahead refers to the location of the variable in the command line. "$1" refers to 'pride_and_prejudice.txt'; "$2" refers to '20'; and "$3" refers to '5'. So, in all, we first select the first 20 lines from 'pride_and_prejudice.txt' and from those 20 lines, we select the last 5 lines. i.e.we selected the first 16 to 20 lines from the text file.
 We need the first line of the shell script to inform that we are using 'sh' as shell, indicating the interpretation of the scripts.
 
 ## Q4. R Batch Run
@@ -186,6 +198,7 @@ for both methods.
     ```{bash}
     cat datClt.R
     ```
+    
     ```{bash}
     Rscript datClt.R
     ```
