@@ -43,5 +43,4 @@ for (r in 1:reps) {
   msePrimeAvg = msePrimeAvg + estMeanPrimes(x)^2
 }
 
-print(mseSampAvg / reps)
-print(msePrimeAvg / reps)
+cat(mseSampAvg / reps, "\n", msePrimeAvg / reps)
