@@ -62,7 +62,7 @@ Please, do **not** put these data files into Git; they are big. Also do **not** 
 Display the number of lines in each `csv` file.
 
 **Solution** 
-    ```{bash, eval=FALSE}
+    ```{bash}
     for datafile in /home/203bdata/mimic-iii/*.csv
       do
         wc -l $datafile
