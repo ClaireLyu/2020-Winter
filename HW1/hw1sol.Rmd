@@ -121,7 +121,8 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
 **Solution** By looking at the result, Elizabeth was the most mentioned.
     ```{bash}
     for name in Elizabeth Jane Lydia Darcy
-      do grep -o -i $name pride_and_prejudice.txt | wc -l
+      do echo $name
+         grep -o -i $name pride_and_prejudice.txt | wc -l
     done
     ```
 
@@ -149,7 +150,7 @@ Using `chmod` make the file executable by the owner, and run
     ```
     
 **Solution** 
-    ```{bash}
+    ```{bash, echo=FALSE}
     ./middle.sh pride_and_prejudice.txt 20 5
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
