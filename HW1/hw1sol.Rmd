@@ -83,7 +83,7 @@ Display the number of lines in each `csv` file.
     ```{bash}
     awk -F, '{ print $2 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq | wc -l
     ```
-**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY` in the order.
+**Solution** Below are the lists of all possible values taken by variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY` in order.
     ```{bash}
     awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
     awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort | uniq
