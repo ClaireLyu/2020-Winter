@@ -28,19 +28,20 @@ mseSampAvg = 0
 msePrimeAvg = 0
 
 for (r in 1:reps) {
-  if (dist == "gaussian"){
+  if (dist == "gaussian") {
     # simulate data
     x = rnorm(n)
-  } else if(dist == "t1"){
+  } else if(dist == "t1") {
     x = rt(n, df = 1)
-  } else if(dist == "t5"){
+  } else if(dist == "t5") {
     x = rt(n, df = 5)
   } else {
     stop("Unrecognized distribution")
   }
+  
   # try two methods
   mseSampAvg = mseSampAvg + mean(x)^2
   msePrimeAvg = msePrimeAvg + estMeanPrimes(x)^2
 }
 
-cat(mseSampAvg / reps, "\n", msePrimeAvg / reps)
+cat(msePrimeAvg / reps, "\n", mseSampAvg / reps)
