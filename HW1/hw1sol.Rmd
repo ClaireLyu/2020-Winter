@@ -105,6 +105,8 @@ Display the number of lines in each `csv` file.
     curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
     ```
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+
+**Solution** By looking at the result, Elizabeth was the most mentioned.
     ```{bash}
     for name in Elizabeth Jane Lydia Darcy
       do grep -o -i $name pride_and_prejudice.txt | wc -l
