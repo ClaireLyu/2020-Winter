@@ -177,7 +177,8 @@ for both methods.
 | 500 | PrimeAvg |       |       |          |
 | 500 | SampAvg  |       |       |          |
 
-**Solution** Below is the resulting table.
+**Solution** Below are the R script that collects results from output files and the resulting table.
     ```{bash}
+    cat datClt.R
     Rscript datClt.R
     ```
