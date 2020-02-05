@@ -149,19 +149,22 @@ What admission types are there?
 ```{r}
 admission %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = ADMISSION_TYPE)) +
+  geom_bar(mapping = aes(x = ADMISSION_TYPE, fill = ADMISSION_TYPE)) +
   labs(x = "Admission Type")
 ```
 
 ### Number of Admissions Per Patient
+
 ```{r}
 admission %>% 
   ggplot() +
+  coord_cartesian(ylim = c(0, 10)) +
   geom_bar(mapping = aes(x = SUBJECT_ID)) +
   labs(x = "Number of admissions per patient")
 ```
 
 ### Admission Location
+
 ```{r}
 admission %>% 
   ggplot() +
@@ -169,43 +172,54 @@ admission %>%
   labs(x = "Admission Location")
 ```
 
-### Insurance, Language, Religion, Marital Status, Ethnicity
+### Insurance, Language, Religion, Marital Status and Ethnicity
+
 ```{r}
 admission %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = INSURANCE)) +
+  geom_bar(mapping = aes(x = INSURANCE, fill = INSURANCE)) +
   labs(x = "Insurance")
 ```
 
 ```{r}
 admission %>% 
-  ggplot() +
-  geom_bar(mapping = aes(x = LANGUAGE)) +
-  labs(x = "Language")
+  ggplot(mapping = aes(x = LANGUAGE, y = factor(1), fill = LANGUAGE)) + 
+  geom_count() + 
+  labs(y = "Language")
+```
+
+```{r}
+admission %>% 
+  ggplot(mapping = aes(x = factor(1), fill = RELIGION)) + 
+  geom_bar(width = 1) + 
+  coord_polar("y") +
+  labs(y = "Religion")
 ```
 
 ```{r}
 admission %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = RELIGION)) +
-  labs(x = "Religion")
-```
-
-```{r}
-admission %>% 
-  ggplot() +
-  geom_bar(mapping = aes(x = MARITAL_STATUS)) +
+  geom_bar(mapping = aes(x = MARITAL_STATUS, fill = MARITAL_STATUS)) +
   labs(x = "Marital Status")
 ```
 
 ```{r}
 admission %>% 
-  ggplot() +
-  geom_bar(mapping = aes(x = Ethnicity)) +
-  labs(x = "Ethnicity")
+  ggplot(mapping = aes(x = ETHNICITY, y = factor(1), fill = ETHNICITY)) + 
+  geom_count() + 
+  labs(y = "Ethnicity")
 ```
 
 ### Death
+
+```{r}
+admission %>% 
+  ggplot(mapping = aes(x = factor(1), fill = HOSPITAL_EXPIRE_FLAG)) + 
+  geom_bar(width = 1) + 
+  coord_polar("y") +
+  labs(title = "Number of Deaths vs. Survivals")
+```
+
 
 ## Q2
 
