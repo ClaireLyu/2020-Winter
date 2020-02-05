@@ -1,0 +1,178 @@
+---
+title: "Biostat 203B Homework 2"
+subtitle: Due Feb 7 @ 11:59PM
+author: "Yuetong Lyu"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+```{r}
+sessionInfo()
+```
+
+Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-III](https://mimic.physionet.org) data introduced in [homework 1](https://ucla-biostat203b-2020winter.github.io/hw/hw1/hw1.html).
+
+## Q1
+
+Demographic information of the patients admitted into hospital is available in `ADMISSION.csv`. See <https://mimic.physionet.org/mimictables/admissions/> for details of each field in this file. Summarize following variables using appropriate graphs:   
+
+- admission year  
+- admission month  
+- admission week day  
+- admission hour  
+- length of hospital stay  
+- admission type  
+- number of admissions per patient  
+- admission location  
+- insurance  
+- language  
+- religion  
+- martial status  
+- ethnicity  
+- death 
+
+Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on only unique patients. 
+
+**Solution**
+
+###Prerequisites
+
+Load tidyverse and lubridate:
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+###import data
+
+Let's first display the first 10 lines of the 'ADMISSIONS.csv' file:
+```{bash}
+head /home/203bdata/mimic-iii/ADMISSIONS.csv
+```
+First try to parse the data:
+```{r}
+admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+admission %>% print(width = Inf)
+```
+Everything looks fine except that I'd like to enforce 'ROW_ID', 'SUBJECT_ID', 'HADM_ID', to be '<int>' and 'HOSPITAL_EXPIRE_FLAG' and 'HAS_CHARTEVENTS_DATA' to be '<lgl>':
+
+```{r}
+admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv",
+                      col_types = cols(ROW_ID = col_integer(),
+                                       SUBJECT_ID = col_integer(),
+                                       HADM_ID = col_integer(),
+                                       HOSPITAL_EXPIRE_FLAG = col_logical(),
+                                       HAS_CHARTEVENTS_DATA = col_logical()))
+admission %>% print(width = Inf)
+```
+
+```{r}
+admission %>%
+  mutate(adm_year = year(ADMITTIME)) %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = adm_year))
+```
+
+###Admission Time 
+I'd like to examine if there is any pattern in the admission time.
+
+Visualize how the number of hospital admissions changes over year.
+
+```{r}
+admission %>%
+  ggplot(aes(x = ADMITTIME)) + 
+  geom_freqpoly(binwidth = 31536000) + # 86400 seconds = a day
+  labs(x = "Admission Year")
+```
+
+```{r}
+admission %>%
+  mutate(adm_month = month(ADMITTIME, label = TRUE)) %>%
+  ggplot(aes(x = adm_month)) + 
+  geom_bar() +
+  labs(x = "Admission Month")
+```
+
+Are any week days busier than others? We see week days are definite busier than weekends.
+
+```{r}
+admission %>% 
+  mutate(adm_wday = wday(ADMITTIME, label = TRUE)) %>%
+  ggplot(aes(x = adm_wday)) +
+  geom_bar() +
+  labs(x = "Admission weekday",
+       title = "Weekdays are busier than weekends")
+```
+
+```{r}
+admission %>% 
+  mutate(adm_hour = hour(ADMITTIME)) %>%
+  ggplot(aes(x = adm_hour)) +
+  geom_bar() +
+  labs(x = "Admission hour")
+```
+
+Distribution of the admission minute. Why those peaks?
+```{r}
+admission %>% 
+  mutate(adm_min = minute(ADMITTIME)) %>%
+  ggplot(aes(x = adm_min)) +
+  geom_freqpoly() +
+  labs(x = "Admission minute")
+```
+
+###Length of Hospital Stay
+
+```{r}
+admission %>% 
+  mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
+  ggplot(aes(x = los_days)) +
+  geom_histogram(bins = 100) +
+  labs(x = "Length of hospital stay (days)")
+```
+
+```{r}
+admission %>% 
+  mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(x = factor(1), y = los_days)) +
+  labs(x = "", y = "Length of hospital stay (days)") + 
+  scale_y_log10()
+```
+
+###Admission Type
+
+What admission types are there?
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = ADMISSION_TYPE)) +
+  labs(x = "Admission Type")
+```
+
+
+## Q2
+
+Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.org/mimictables/patients/>) and summarize following variables using appropriate graphs:  
+
+- gender  
+- age at admission 
+
+## Q3
+
+`ICUSTAYS.csv` (<https://mimic.physionet.org/mimictables/icustays/>) contains data about Intensive Care Units (ICU) stays. Summarize following variables using appropriate graphs:  
+
+- length of ICU stay  
+- first ICU unit  
+- gender  
+- age  
+
+## Q4 
+
+`CHARTEVENTS.csv` (<https://mimic.physionet.org/mimictables/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `ITEMID` variable indicates a single measurement type in the database. The `VALUE` variable is the value measured for `ITEMID`. 
+
+`D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
+
+Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
