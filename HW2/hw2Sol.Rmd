@@ -153,6 +153,28 @@ admission %>%
   labs(x = "Admission Type")
 ```
 
+### Number of Admissions Per Patient
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = SUBJECT_ID)) +
+  labs(x = "Number of admissions per patient")
+```
+
+### Admission Location
+
+
+### Insurance
+
+### Language
+
+### Religion
+
+### Martial Status
+
+### Ethnicity
+
+### Death
 
 ## Q2
 
