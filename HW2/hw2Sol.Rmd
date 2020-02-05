@@ -37,7 +37,7 @@ Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) i
 
 **Solution**
 
-###Prerequisites
+### Prerequisites
 
 Load tidyverse and lubridate:
 ```{r}
@@ -45,7 +45,7 @@ library(tidyverse)
 library(lubridate)
 ```
 
-###import data
+### Import data
 
 Let's first display the first 10 lines of the 'ADMISSIONS.csv' file:
 ```{bash}
@@ -72,10 +72,11 @@ admission %>% print(width = Inf)
 admission %>%
   mutate(adm_year = year(ADMITTIME)) %>%
   ggplot() +
-  geom_bar(mapping = aes(x = adm_year))
+  geom_bar(mapping = aes(x = adm_year)) +
+  labs(x = "Admission Year")
 ```
 
-###Admission Time 
+### Admission Time 
 I'd like to examine if there is any pattern in the admission time.
 
 Visualize how the number of hospital admissions changes over year.
@@ -123,7 +124,7 @@ admission %>%
   labs(x = "Admission minute")
 ```
 
-###Length of Hospital Stay
+### Length of Hospital Stay
 
 ```{r}
 admission %>% 
@@ -142,7 +143,7 @@ admission %>%
   scale_y_log10()
 ```
 
-###Admission Type
+### Admission Type
 
 What admission types are there?
 ```{r}
