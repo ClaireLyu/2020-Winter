@@ -162,17 +162,48 @@ admission %>%
 ```
 
 ### Admission Location
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = ADMISSION_LOCATION)) +
+  labs(x = "Admission Location")
+```
 
+### Insurance, Language, Religion, Marital Status, Ethnicity
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = INSURANCE)) +
+  labs(x = "Insurance")
+```
 
-### Insurance
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = LANGUAGE)) +
+  labs(x = "Language")
+```
 
-### Language
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = RELIGION)) +
+  labs(x = "Religion")
+```
 
-### Religion
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = MARITAL_STATUS)) +
+  labs(x = "Marital Status")
+```
 
-### Martial Status
-
-### Ethnicity
+```{r}
+admission %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = Ethnicity)) +
+  labs(x = "Ethnicity")
+```
 
 ### Death
 
