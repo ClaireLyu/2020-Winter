@@ -164,6 +164,7 @@ admission %>%
   group_by(SUBJECT_ID) %>%
   summarise(counts = n()) %>%
   ggplot() +
+  coord_cartesian(xlim = c(0, 10)) +
   geom_bar(mapping = aes(x = counts)) +
   labs(x = "Number of admissions per patient")
 ```
