@@ -130,6 +130,7 @@ admission %>%
 admission %>% 
   mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
   ggplot(aes(x = los_days)) +
+  coord_cartesian(xlim = c(0, 150)) + 
   geom_histogram(bins = 100) +
   labs(x = "Length of hospital stay (days)")
 ```
@@ -227,6 +228,34 @@ Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.or
 
 - gender  
 - age at admission 
+
+**Solution**
+
+First we link the 'ADMISSIONS.csv' and 'PATIENTS.csv' together.
+```{r}
+patient <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
+aP <- left_join(admission, patient, by = "SUBJECT_ID")
+```
+
+Next, we summerize some variables using appropriate graphs.
+
+### Gender
+```{r}
+aP %>% 
+  ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
+  geom_bar(width = 1) + 
+  coord_polar("y") +
+  labs(y = "Gender")
+```
+
+### Age at Admission
+```{r}
+aP %>% 
+  mutate(age_Ad = as.numeric(as.duration(ADMITTIME - DOB) / 31536000)) %>%
+  ggplot(aes(x = age_Ad)) +
+  geom_histogram(bins = 100) +
+  labs(x = "Age at Admission")
+```
 
 ## Q3
 
