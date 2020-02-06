@@ -226,7 +226,7 @@ admission %>%
   ggplot(mapping = aes(x = factor(1), fill = HOSPITAL_EXPIRE_FLAG)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  scale_fill_discrete(labels = c("Survivals", "Deaths")) +
+  scale_fill_discrete(name = NULL, labels = c("Survivals", "Deaths")) +
   labs(title = "Number of Deaths vs. Survivals", subtitle = "FALSE refers to Survivals and TRUE refers to Deaths")
 ```
 
