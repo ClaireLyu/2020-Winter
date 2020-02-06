@@ -285,12 +285,13 @@ patient <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
 aP <- left_join(admission, patient, by = "SUBJECT_ID")
 ```
 
-Next, we summerize some variables using appropriate graphs.
+Next, we summerize some variables based on unique patients using appropriate graphs.
 
 ### Gender
 
 ```{r}
 aP %>% 
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
@@ -302,6 +303,7 @@ aP %>%
 
 ```{r}
 aP %>% 
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   mutate(age_Ad = as.numeric(as.duration(ADMITTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_Ad)) +
   coord_cartesian(xlim = c(0, 100)) +
