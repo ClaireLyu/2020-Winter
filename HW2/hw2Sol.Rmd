@@ -309,7 +309,9 @@ aP %>%
   coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
   labs(x = "Age at Admission",
-       title = "Distribution of Patients' Age at Admission")
+       title = "Distribution of Patients' Age at Admission",
+       subtitle = "A large proportion of admissions comes from Newborns.
+       No admission from age 1 to 13.")
 ```
 
 ## Q3
@@ -334,7 +336,9 @@ ICU %>%
   coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
   labs(x = "Length of ICU stay (days)",
-       title = "Distribution of Length of ICU Stay")
+       title = "Distribution of Length of ICU Stay",
+       subtitle = "Only a small proportion of patients stayed in ICU 
+       for more than 25 days.")
 ```
 
 ### First ICU Unit
@@ -359,7 +363,8 @@ iP %>%
   ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  labs(y = "Gender")
+  labs(y = "Gender",
+       title = "Distribution of ICU Patients' Gender")
 ```
 
 ### Age
@@ -370,7 +375,9 @@ iP %>%
   ggplot(aes(x = age_ICU)) +
   coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
-  labs(x = "Age when transfered to ICU")
+  labs(x = "Age when transfered to ICU",
+       title = "Distribution of ICU Patients' Age",
+       subtitle = "Similar pattern as 'age at admission'")
 ```
 
 ## Q4 
