@@ -161,8 +161,6 @@ admission %>%
 
 ```{r}
 admission %>% 
-  group_by(SUBJECT_ID) %>%
-  count()
   ggplot() +
   coord_cartesian(ylim = c(0, 10)) +
   geom_bar(mapping = aes(x = SUBJECT_ID)) +
@@ -175,7 +173,9 @@ admission %>%
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = ADMISSION_LOCATION, fill = ADMISSION_LOCATION)) +
-  labs(x = "Admission Location")
+  labs(x = "Admission Location") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 ```
 
 ### Insurance, Language, Religion, Marital Status and Ethnicity
@@ -192,7 +192,7 @@ admission %>%
   ggplot(mapping = aes(x = factor(1), fill = LANGUAGE)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  labs(y = "Language")
+  labs(y = "Language") 
 ```
 
 ```{r}
@@ -207,14 +207,16 @@ admission %>%
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = MARITAL_STATUS, fill = MARITAL_STATUS)) +
-  labs(x = "Marital Status")
+  labs(x = "Marital Status") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 ```
 
 ```{r}
 admission %>% 
   ggplot(mapping = aes(x = ETHNICITY, y = factor(1), fill = ETHNICITY)) + 
   geom_count() + 
-  labs(y = "Ethnicity", subtitle = "FALSE refers to Survivals and TRUE refers to Deaths")
+  labs(y = "Ethnicity")
 ```
 
 ### Death
@@ -224,7 +226,7 @@ admission %>%
   ggplot(mapping = aes(x = factor(1), fill = HOSPITAL_EXPIRE_FLAG)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  labs(title = "Number of Deaths vs. Survivals")
+  labs(title = "Number of Deaths vs. Survivals", subtitle = "FALSE refers to Survivals and TRUE refers to Deaths")
 ```
 
 
