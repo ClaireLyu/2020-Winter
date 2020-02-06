@@ -355,6 +355,7 @@ iP <- left_join(ICU, patient, by = "SUBJECT_ID")
 ### Gender
 ```{r}
 iP %>% 
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
@@ -364,6 +365,7 @@ iP %>%
 ### Age
 ```{r}
 iP %>% 
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   mutate(age_ICU = as.numeric(as.duration(INTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_ICU)) +
   coord_cartesian(xlim = c(0, 100)) +
