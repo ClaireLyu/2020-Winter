@@ -322,3 +322,21 @@ iP %>%
 `D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
 
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
+
+**Solution**
+
+First parse the data:
+```{r}
+chartevent <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv")
+ditem <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv")
+```
+
+Link 'D_ITEMS.csv' to 'CHARTEVENTS.csv' by key "ITEMID": 
+```{r}
+cd <- left_join(chartevent, ditem, by = "ITEMID")
+```
+
+Find the potential "ITEMID" that contains systolic blood pressure:
+```{r}
+unique(subset(cd$ITEMID, str_detect(cd$LABEL, "systolic")))
+```
