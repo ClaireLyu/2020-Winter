@@ -102,7 +102,7 @@ admission %>%
   geom_bar() +
   labs(x = "Admission Month",
        title = "Distribution of the Admission Month",
-       caption = "We see the number of hospital admissions are 
+       subtitle = "We see the number of hospital admissions are 
        approximately evenly distributed over months.")
 ```
 
@@ -113,7 +113,7 @@ admission %>%
   geom_bar() +
   labs(x = "Admission weekday",
        title = "Distribution of the Admission Weekday",
-       caption = "Weekdays are busier than weekends")
+       subtitle = "Weekdays are busier than weekends")
 ```
 
 
@@ -124,7 +124,7 @@ admission %>%
   geom_bar() +
   labs(x = "Admission hour",
        title = "Distribution of the Admission Hour",
-       caption = "The peak hour of admissions is 7 a.m. in the morning. 
+       subtitle = "The peak hour of admissions is 7 a.m. in the morning. 
        And there are commonly more admissions from 12 p.m. throughout midnight. ")
 ```
 
@@ -147,7 +147,7 @@ admission %>%
   geom_histogram(bins = 100) +
   labs(x = "Length of hospital stay (days)",
        title = "Distribution of the Length of Hospital Stay",
-       caption = "The majority of patients stayed in the hospital less than 50 days.")
+       subtitle = "The majority of patients stayed in the hospital less than 50 days.")
 ```
 
 ```{r}
@@ -181,7 +181,7 @@ admission %>%
   geom_bar(mapping = aes(x = counts)) +
   labs(x = "Number of admissions per patient",
        title = "Distribution of the Number of Admissions Per Patient",
-       caption = "Most patients have only admitted to the hospital once.")
+       subtitle = "Most patients have only admitted to the hospital once.")
 ```
 
 ### Admission Location
@@ -254,7 +254,7 @@ admission %>%
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
   labs(title = "Number of Deaths vs. Survivals",
-       caption = "The majority of patients survived after their admissions 
+       subtitle = "The majority of patients survived after their admissions 
        to the hospital.")
 ```
 
