@@ -150,16 +150,6 @@ admission %>%
        subtitle = "The majority of patients stayed in the hospital less than 50 days.")
 ```
 
-```{r}
-admission %>% 
-  mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
-  ggplot() +
-  geom_boxplot(mapping = aes(x = factor(1), y = los_days)) +
-  labs(x = "", y = "Length of hospital stay (days)",
-       title = "Distribution of the Length of Hospital Stay") + 
-  scale_y_log10()
-```
-
 ### Admission Type
 
 What admission types are there?
