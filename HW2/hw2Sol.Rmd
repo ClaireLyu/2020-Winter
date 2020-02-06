@@ -266,6 +266,51 @@ aP %>%
 - gender  
 - age  
 
+**Solution**
+First, we parse the 'ICUSTAYS.csv' data:
+```{r}
+ICU <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
+```
+
+### Length of ICU Stay
+```{r}
+ICU %>% 
+  ggplot(aes(x = LOS)) +
+  geom_histogram(bins = 100) +
+  labs(x = "Length of ICU stay (days)")
+```
+
+### First ICU Unit
+```{r}
+ICU %>% 
+  ggplot() +
+  geom_bar(mapping = aes(x = FIRST_WARDID, fill = FIRST_WARDID)) +
+  labs(x = "First ICU Unit patients stayed")
+```
+
+To summerize the other two variables, we need to link the 'ICUSTAYS.csv' to the 'PATIENTS.csv':
+```{r}
+iP <- left_join(ICU, patient, by = "SUBJECT_ID")
+```
+
+### Gender
+```{r}
+iP %>% 
+  ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
+  geom_bar(width = 1) + 
+  coord_polar("y") +
+  labs(y = "Gender")
+```
+
+### Age
+```{r}
+iP %>% 
+  mutate(age_ICU = as.numeric(as.duration(INTIME - DOB) / 31536000)) %>%
+  ggplot(aes(x = age_ICU)) +
+  geom_histogram(bins = 100) +
+  labs(x = "Age when transfered to ICU")
+```
+
 ## Q4 
 
 `CHARTEVENTS.csv` (<https://mimic.physionet.org/mimictables/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `ITEMID` variable indicates a single measurement type in the database. The `VALUE` variable is the value measured for `ITEMID`. 
