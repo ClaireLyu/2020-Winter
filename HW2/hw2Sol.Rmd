@@ -54,12 +54,14 @@ Let's first display the first 10 lines of the 'ADMISSIONS.csv' file:
 ```{bash}
 head /home/203bdata/mimic-iii/ADMISSIONS.csv
 ```
+
 First try to parse the data:
 ```{r}
 admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
 admission %>% print(width = Inf)
 ```
-Everything looks fine except that I'd like to enforce 'ROW_ID', 'SUBJECT_ID', 'HADM_ID', to be '<int>' and 'HOSPITAL_EXPIRE_FLAG' and 'HAS_CHARTEVENTS_DATA' to be '<lgl>':
+
+Everything looks fine except that I'd like to enforce 'ROW_ID', 'SUBJECT_ID', 'HADM_ID', to be `<int>` and 'HOSPITAL_EXPIRE_FLAG' and 'HAS_CHARTEVENTS_DATA' to be `<lgl>`:
 
 ```{r}
 admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv",
@@ -72,8 +74,8 @@ admission %>% print(width = Inf)
 ```
 
 ### Admission Time 
-I'd like to examine if there is any pattern in the admission time.
 
+I'd like to examine if there is any pattern in the admission time.
 Visualize how the number of hospital admissions changes over year.
 
 ```{r}
@@ -81,14 +83,16 @@ admission %>%
   mutate(adm_year = year(ADMITTIME)) %>%
   ggplot() +
   geom_bar(mapping = aes(x = adm_year)) +
-  labs(x = "Admission Year")
+  labs(x = "Admission Year",
+       title = "Distribution of the Admission Year")
 ```
 
 ```{r}
 admission %>%
   ggplot(aes(x = ADMITTIME)) + 
   geom_freqpoly(binwidth = 31536000) + # 86400 seconds = a day
-  labs(x = "Admission Year")
+  labs(x = "Admission Year",
+       title = "Distribution of the Admission Year")
 ```
 
 ```{r}
@@ -96,10 +100,11 @@ admission %>%
   mutate(adm_month = month(ADMITTIME, label = TRUE)) %>%
   ggplot(aes(x = adm_month)) + 
   geom_bar() +
-  labs(x = "Admission Month")
+  labs(x = "Admission Month",
+       title = "Distribution of the Admission Month",
+       caption = "We see the number of hospital admissions are 
+       approximately evenly distributed over months.")
 ```
-
-We see weekdays are definite busier than weekends.
 
 ```{r}
 admission %>% 
@@ -107,24 +112,29 @@ admission %>%
   ggplot(aes(x = adm_wday)) +
   geom_bar() +
   labs(x = "Admission weekday",
-       title = "Weekdays are busier than weekends")
+       title = "Distribution of the Admission Weekday",
+       caption = "Weekdays are busier than weekends")
 ```
+
 
 ```{r}
 admission %>% 
   mutate(adm_hour = hour(ADMITTIME)) %>%
   ggplot(aes(x = adm_hour)) +
   geom_bar() +
-  labs(x = "Admission hour")
+  labs(x = "Admission hour",
+       title = "Distribution of the Admission Hour",
+       caption = "The peak hour of admissions is 7 a.m. in the morning. 
+       And there are commonly more admissions from 12 p.m. throughout midnight. ")
 ```
 
-Distribution of the admission minute. 
+Further question to consider: Why those peaks?  
 ```{r}
 admission %>% 
   mutate(adm_min = minute(ADMITTIME)) %>%
   ggplot(aes(x = adm_min)) +
   geom_freqpoly() +
-  labs(x = "Admission minute")
+  labs(x = "Admission minute", title = "Distribution of the Admission Minute")
 ```
 
 ### Length of Hospital Stay
@@ -135,7 +145,9 @@ admission %>%
   ggplot(aes(x = los_days)) +
   coord_cartesian(xlim = c(0, 150)) + 
   geom_histogram(bins = 100) +
-  labs(x = "Length of hospital stay (days)")
+  labs(x = "Length of hospital stay (days)",
+       title = "Distribution of the Length of Hospital Stay",
+       caption = "The majority of patients stayed in the hospital less than 50 days.")
 ```
 
 ```{r}
@@ -143,7 +155,8 @@ admission %>%
   mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
   ggplot() +
   geom_boxplot(mapping = aes(x = factor(1), y = los_days)) +
-  labs(x = "", y = "Length of hospital stay (days)") + 
+  labs(x = "", y = "Length of hospital stay (days)",
+       title = "Distribution of the Length of Hospital Stay") + 
   scale_y_log10()
 ```
 
@@ -154,7 +167,7 @@ What admission types are there?
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = ADMISSION_TYPE, fill = ADMISSION_TYPE)) +
-  labs(x = "Admission Type")
+  labs(x = "Admission Type", title = "Distribution of the Admission Type")
 ```
 
 ### Number of Admissions Per Patient
@@ -166,7 +179,9 @@ admission %>%
   ggplot() +
   coord_cartesian(xlim = c(0, 10)) +
   geom_bar(mapping = aes(x = counts)) +
-  labs(x = "Number of admissions per patient")
+  labs(x = "Number of admissions per patient",
+       title = "Distribution of the Number of Admissions Per Patient",
+       caption = "Most patients have only admitted to the hospital once.")
 ```
 
 ### Admission Location
@@ -175,7 +190,8 @@ admission %>%
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = ADMISSION_LOCATION, fill = ADMISSION_LOCATION)) +
-  labs(x = "Admission Location") +
+  labs(x = "Admission Location", 
+       title = "Distribution of the Admission Location") +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
@@ -186,7 +202,8 @@ admission %>%
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = INSURANCE, fill = INSURANCE)) +
-  labs(x = "Insurance")
+  labs(x = "Insurance",
+       title = "Distribution of Patients' Insurance")
 ```
 
 ```{r}
@@ -194,7 +211,8 @@ admission %>%
   ggplot(mapping = aes(x = factor(1), fill = LANGUAGE)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  labs(y = "Language") 
+  labs(y = "Language",
+       title = "Distribution of Patients' Language") 
 ```
 
 ```{r}
@@ -202,14 +220,16 @@ admission %>%
   ggplot(mapping = aes(x = factor(1), fill = RELIGION)) + 
   geom_bar(width = 1) + 
   coord_polar("y") +
-  labs(y = "Religion")
+  labs(y = "Religion",
+       title = "Distribution of Patients' Religion")
 ```
 
 ```{r}
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = MARITAL_STATUS, fill = MARITAL_STATUS)) +
-  labs(x = "Marital Status") +
+  labs(x = "Marital Status",
+       title = "Distribution of Patients' Marital Status") +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
@@ -218,7 +238,8 @@ admission %>%
 admission %>% 
   ggplot(mapping = aes(x = ETHNICITY, y = factor(1), fill = ETHNICITY)) + 
   geom_count() + 
-  labs(y = "Ethnicity")
+  labs(y = "Ethnicity",
+       title = "Distribution of Patients' Ethnicity")
 ```
 
 ### Death
@@ -232,7 +253,9 @@ admission %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Number of Deaths vs. Survivals")
+  labs(title = "Number of Deaths vs. Survivals",
+       caption = "The majority of patients survived after their admissions 
+       to the hospital.")
 ```
 
 
