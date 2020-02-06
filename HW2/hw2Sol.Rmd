@@ -2,7 +2,10 @@
 title: "Biostat 203B Homework 2"
 subtitle: Due Feb 7 @ 11:59PM
 author: "Yuetong Lyu"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 4
 ---
 
 ```{r setup, include=FALSE}
@@ -276,6 +279,7 @@ ICU <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
 ```{r}
 ICU %>% 
   ggplot(aes(x = LOS)) +
+  coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
   labs(x = "Length of ICU stay (days)")
 ```
@@ -284,8 +288,8 @@ ICU %>%
 ```{r}
 ICU %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = FIRST_WARDID, fill = FIRST_WARDID)) +
-  labs(x = "First ICU Unit patients stayed")
+  geom_bar(mapping = aes(x = FIRST_CAREUNIT, fill = FIRST_CAREUNIT)) +
+  labs(x = "First ICU Unit Care")
 ```
 
 To summerize the other two variables, we need to link the 'ICUSTAYS.csv' to the 'PATIENTS.csv':
