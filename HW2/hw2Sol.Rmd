@@ -267,6 +267,7 @@ aP %>%
 aP %>% 
   mutate(age_Ad = as.numeric(as.duration(ADMITTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_Ad)) +
+  coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
   labs(x = "Age at Admission")
 ```
@@ -322,6 +323,7 @@ iP %>%
 iP %>% 
   mutate(age_ICU = as.numeric(as.duration(INTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_ICU)) +
+  coord_cartesian(xlim = c(0, 100)) +
   geom_histogram(bins = 100) +
   labs(x = "Age when transfered to ICU")
 ```
