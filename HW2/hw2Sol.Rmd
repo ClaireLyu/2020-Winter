@@ -71,6 +71,11 @@ admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv",
 admission %>% print(width = Inf)
 ```
 
+### Admission Time 
+I'd like to examine if there is any pattern in the admission time.
+
+Visualize how the number of hospital admissions changes over year.
+
 ```{r}
 admission %>%
   mutate(adm_year = year(ADMITTIME)) %>%
@@ -78,11 +83,6 @@ admission %>%
   geom_bar(mapping = aes(x = adm_year)) +
   labs(x = "Admission Year")
 ```
-
-### Admission Time 
-I'd like to examine if there is any pattern in the admission time.
-
-Visualize how the number of hospital admissions changes over year.
 
 ```{r}
 admission %>%
@@ -99,7 +99,7 @@ admission %>%
   labs(x = "Admission Month")
 ```
 
-Are any week days busier than others? We see week days are definite busier than weekends.
+We see weekdays are definite busier than weekends.
 
 ```{r}
 admission %>% 
@@ -118,7 +118,7 @@ admission %>%
   labs(x = "Admission hour")
 ```
 
-Distribution of the admission minute. Why those peaks?
+Distribution of the admission minute. 
 ```{r}
 admission %>% 
   mutate(adm_min = minute(ADMITTIME)) %>%
@@ -161,6 +161,8 @@ admission %>%
 
 ```{r}
 admission %>% 
+  group_by(SUBJECT_ID) %>%
+  count()
   ggplot() +
   coord_cartesian(ylim = c(0, 10)) +
   geom_bar(mapping = aes(x = SUBJECT_ID)) +
@@ -172,7 +174,7 @@ admission %>%
 ```{r}
 admission %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = ADMISSION_LOCATION)) +
+  geom_bar(mapping = aes(x = ADMISSION_LOCATION, fill = ADMISSION_LOCATION)) +
   labs(x = "Admission Location")
 ```
 
@@ -187,8 +189,9 @@ admission %>%
 
 ```{r}
 admission %>% 
-  ggplot(mapping = aes(x = LANGUAGE, y = factor(1), fill = LANGUAGE)) + 
-  geom_count() + 
+  ggplot(mapping = aes(x = factor(1), fill = LANGUAGE)) + 
+  geom_bar(width = 1) + 
+  coord_polar("y") +
   labs(y = "Language")
 ```
 
@@ -211,7 +214,7 @@ admission %>%
 admission %>% 
   ggplot(mapping = aes(x = ETHNICITY, y = factor(1), fill = ETHNICITY)) + 
   geom_count() + 
-  labs(y = "Ethnicity")
+  labs(y = "Ethnicity", subtitle = "FALSE refers to Survivals and TRUE refers to Deaths")
 ```
 
 ### Death
@@ -321,8 +324,6 @@ iP %>%
 
 `D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
 
-Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
-
 **Solution**
 
 First parse the data:
@@ -331,12 +332,24 @@ chartevent <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv")
 ditem <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv")
 ```
 
-Link 'D_ITEMS.csv' to 'CHARTEVENTS.csv' by key "ITEMID": 
-```{r}
-cd <- left_join(chartevent, ditem, by = "ITEMID")
-```
-
 Find the potential "ITEMID" that contains systolic blood pressure:
 ```{r}
-unique(subset(cd$ITEMID, str_detect(cd$LABEL, "systolic")))
+subset(ditem$ITEMID, str_detect(ditem$LABEL, "systolic"))
 ```
+
+
+Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
+
+**Solution**
+
+First subset first ICU stay of unique patients: 
+```{r}
+ICU_uniq <- distinct(ICU, SUBJECT_ID, .keep_all = TRUE)
+```
+
+Then, link the patients' demographic info that included in 'PATIENTS.csv':
+```{r}
+temp1 <- left_join(ICU_uniq, patient, by = "SUBJECT_ID")
+temp2 <- left_join(temp1, chartevent, by = "SUBJECT_ID")
+```
+
