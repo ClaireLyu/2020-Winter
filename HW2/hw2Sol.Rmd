@@ -227,9 +227,11 @@ admission %>%
 admission %>% 
   ggplot(mapping = aes(x = HOSPITAL_EXPIRE_FLAG, fill = HOSPITAL_EXPIRE_FLAG)) + 
   geom_bar() + 
-  scale_fill_discrete(labels = c("Survivals", "Deaths")) +
+  scale_fill_discrete(name = NULL, labels = c("Survivals", "Deaths")) +
   theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
   labs(title = "Number of Deaths vs. Survivals")
 ```
 
