@@ -302,7 +302,6 @@ aP %>%
 
 ```{r}
 aP %>% 
-  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   mutate(age_Ad = as.numeric(as.duration(ADMITTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_Ad)) +
   geom_histogram(bins = 100) +
@@ -371,7 +370,6 @@ iP %>%
 ### Age
 ```{r}
 iP %>% 
-  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   mutate(age_ICU = as.numeric(as.duration(INTIME - DOB) / 31536000)) %>%
   ggplot(aes(x = age_ICU)) +
   geom_histogram(bins = 100) +
@@ -399,17 +397,24 @@ ditem <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv")
 
 Find the potential "ITEMID" that contains systolic blood pressure:
 ```{r}
-subset(ditem$ITEMID, str_detect(ditem$LABEL, "systolic"))
+sys_ID <- subset(ditem$ITEMID, str_detect(ditem$LABEL, "systolic"))
+sys_ID
 ```
-
 
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
 
 **Solution**
 
-First subset first ICU stay of unique patients: 
+First, I grouped the patients by their SUBJECT_ID and ranked their time transfered into ICU from the earliest to the latest. Then, I extracted the earliest time, which represents their first time staying in ICU. 
 ```{r}
-ICU_uniq <- distinct(ICU, SUBJECT_ID, .keep_all = TRUE)
+ICU %>%
+  group_by(SUBJECT_ID) %>%
+  arrange(INTIME) %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
+  left_join(patient, by = "SUBJECT_ID") %>% 
+  left_join(admission, by = "SUBJECT_ID") %>%
+  mutate(DIED_30 = ((DEATHTIME - ADMITTIME) < 30)) %>%
+  
 ```
 
 Then, link the patients' demographic info that included in 'PATIENTS.csv':
