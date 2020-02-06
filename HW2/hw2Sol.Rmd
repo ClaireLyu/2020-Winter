@@ -225,10 +225,11 @@ admission %>%
 
 ```{r}
 admission %>% 
-  ggplot(mapping = aes(x = factor(1), fill = HOSPITAL_EXPIRE_FLAG)) + 
-  geom_bar(width = 1) + 
-  coord_polar("y") +
+  ggplot(mapping = aes(x = HOSPITAL_EXPIRE_FLAG, fill = HOSPITAL_EXPIRE_FLAG)) + 
+  geom_bar() + 
   scale_fill_discrete(labels = c("Survivals", "Deaths")) +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
   labs(title = "Number of Deaths vs. Survivals")
 ```
 
