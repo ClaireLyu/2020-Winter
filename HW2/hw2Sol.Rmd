@@ -407,19 +407,24 @@ Compile a tibble that contains the first ICU stay of unique patients, with the p
 
 First, I grouped the patients by their SUBJECT_ID and ranked their time transfered into ICU from the earliest to the latest. Then, I extracted the earliest time, which represents their first time staying in ICU. 
 ```{r}
+temp <- chartevent %>%
+          filter(ITEMID %in% sys_ID) %>%
+          group_by(SUBJECT_ID) %>%
+          arrange(CHARTTIME) %>%
+          distinct(SUBJECT_ID, .keep_all = TRUE) %>%
+          select(SUBJECT_ID, VALUE)
+temp
+```
+
+```{r}
 ICU %>%
   group_by(SUBJECT_ID) %>%
   arrange(INTIME) %>%
   distinct(SUBJECT_ID, .keep_all = TRUE) %>%
   left_join(patient, by = "SUBJECT_ID") %>% 
-  left_join(admission, by = "SUBJECT_ID") %>%
+  left_join(temp, by = "SUBJECT_ID") %>%
+  left_join(admission, by = "HADM_ID") %>%
   mutate(DIED_30 = ((DEATHTIME - ADMITTIME) < 30)) %>%
-  
+  select(SUBJECT_ID.x, INTIME, GENDER, DOB, LANGUAGE, MARITAL_STATUS, VALUE, DIED_30, DEATHTIME, ADMITTIME) %>%
+  print(width = Inf)
 ```
-
-Then, link the patients' demographic info that included in 'PATIENTS.csv':
-```{r}
-temp1 <- left_join(ICU_uniq, patient, by = "SUBJECT_ID")
-temp2 <- left_join(temp1, chartevent, by = "SUBJECT_ID")
-```
-
