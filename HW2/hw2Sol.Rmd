@@ -79,7 +79,7 @@ admission %>%
   geom_freqpoly(binwidth = 31536000) + # 86400 seconds = a day
   labs(x = "Admission Year",
        title = "Distribution of the Admission Year",
-       subtitle = "There was no outbreak of admissions over years.")
+       subtitle = "There was no apparent outbreak of admissions over years.")
 ```
 
 ```{r}
@@ -180,7 +180,7 @@ admission %>%
 
 ### Insurance, Language, Religion, Marital Status and Ethnicity
 
-For those variables, we need to summarize them based on only unique patients.
+For those variables, I will summarize them based on unique patients.
 
 ```{r}
 admission %>% 
@@ -225,7 +225,7 @@ admission %>%
   geom_bar(mapping = aes(x = MARITAL_STATUS, fill = MARITAL_STATUS)) +
   labs(x = "Marital Status",
        title = "Distribution of Patients' Marital Status",
-       subtitle = "Many patients were married.") +
+       subtitle = "Excluding NA, nearly half of the patients were married.") +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
@@ -283,7 +283,7 @@ patient <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
 aP <- left_join(admission, patient, by = "SUBJECT_ID")
 ```
 
-Next, I will summerize some variables based on unique patients using appropriate graphs.
+Next, I will summerize the gender based on unique patients.
 
 ### Gender
 
@@ -301,6 +301,7 @@ aP %>%
 
 ### Age at Admission
 
+For age, I will count the age of a single patient everytime he or she was admitted to the hospital (may count multiple times for the same patient). 
 ```{r}
 aP %>% 
   mutate(age_Ad = as.numeric(as.duration(ADMITTIME - DOB) / 31536000)) %>%
@@ -331,6 +332,8 @@ ICU <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
 ```
 
 ### Length of ICU Stay
+
+Similar as Q2, age at admission, I will treat patient who had been transfered into ICU for multiple times as different observations. One patient could contribute to multiple lengths of ICU stay. Same applies to the following plots for 'First ICU Unit' and 'Age'.
 ```{r}
 ICU %>% 
   ggplot(aes(x = LOS)) +
@@ -343,6 +346,7 @@ ICU %>%
 ```
 
 ### First ICU Unit
+
 ```{r}
 ICU %>% 
   ggplot() +
@@ -368,7 +372,7 @@ iP %>%
   coord_polar("y") +
   labs(y = "Gender",
        title = "Distribution of ICU Patients' Gender",
-       subtitle = "Similar pattern as 'age at admission'")
+       subtitle = "Similar pattern as 'admission gender'")
 ```
 
 ### Age
