@@ -425,6 +425,6 @@ ICU %>%
   left_join(temp, by = "SUBJECT_ID") %>%
   left_join(admission, by = "HADM_ID") %>%
   mutate(DIED_30 = ((DEATHTIME - ADMITTIME) < 30)) %>%
-  select(SUBJECT_ID.x, INTIME, GENDER, DOB, LANGUAGE, MARITAL_STATUS, VALUE, DIED_30, DEATHTIME, ADMITTIME) %>%
+  select(SUBJECT_ID.x, INTIME, GENDER, DOB, LANGUAGE, MARITAL_STATUS, VALUE, DIED_30) %>%
   print(width = Inf)
 ```
