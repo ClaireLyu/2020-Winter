@@ -50,12 +50,7 @@ library(lubridate)
 
 ### Import data
 
-Let's first display the first 10 lines of the 'ADMISSIONS.csv' file:
-```{bash}
-head /home/203bdata/mimic-iii/ADMISSIONS.csv
-```
-
-First try to parse the data:
+First, try to parse the data:
 ```{r}
 admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
 admission %>% print(width = Inf)
@@ -80,19 +75,11 @@ Visualize how the number of hospital admissions changes over year.
 
 ```{r}
 admission %>%
-  mutate(adm_year = year(ADMITTIME)) %>%
-  ggplot() +
-  geom_bar(mapping = aes(x = adm_year)) +
-  labs(x = "Admission Year",
-       title = "Distribution of the Admission Year")
-```
-
-```{r}
-admission %>%
   ggplot(aes(x = ADMITTIME)) + 
   geom_freqpoly(binwidth = 31536000) + # 86400 seconds = a day
   labs(x = "Admission Year",
-       title = "Distribution of the Admission Year")
+       title = "Distribution of the Admission Year",
+       subtitle = "There was no outbreak of admissions over years.")
 ```
 
 ```{r}
@@ -102,7 +89,7 @@ admission %>%
   geom_bar() +
   labs(x = "Admission Month",
        title = "Distribution of the Admission Month",
-       subtitle = "We see the number of hospital admissions are 
+       subtitle = "The number of hospital admissions were 
        approximately evenly distributed over months.")
 ```
 
@@ -113,9 +100,8 @@ admission %>%
   geom_bar() +
   labs(x = "Admission weekday",
        title = "Distribution of the Admission Weekday",
-       subtitle = "Weekdays are busier than weekends")
+       subtitle = "Weekdays were busier than weekends")
 ```
-
 
 ```{r}
 admission %>% 
@@ -124,17 +110,19 @@ admission %>%
   geom_bar() +
   labs(x = "Admission hour",
        title = "Distribution of the Admission Hour",
-       subtitle = "The peak hour of admissions is 7 a.m. in the morning. 
-       There are commonly more admissions from 12 p.m. throughout midnight. ")
+       subtitle = "The peak hour of admissions was 7 a.m. in the morning. 
+       There were commonly more admissions from 12 p.m. throughout midnight. ")
 ```
 
-Further question to consider: Why those peaks?  
+Why those peaks?  
 ```{r}
 admission %>% 
   mutate(adm_min = minute(ADMITTIME)) %>%
   ggplot(aes(x = adm_min)) +
   geom_freqpoly() +
-  labs(x = "Admission minute", title = "Distribution of the Admission Minute")
+  labs(x = "Admission minute", title = "Distribution of the Admission Minute",
+       subtitle = "There were several peaks of the admission minutes.
+       We may consider explore on them more.")
 ```
 
 ### Length of Hospital Stay
@@ -158,7 +146,8 @@ What admission types are there?
 admission %>% 
   ggplot() +
   geom_bar(mapping = aes(x = ADMISSION_TYPE, fill = ADMISSION_TYPE)) +
-  labs(x = "Admission Type", title = "Distribution of the Admission Type")
+  labs(x = "Admission Type", title = "Distribution of the Admission Type",
+       subtitle = "A majority of patients' admissions were of emergency.")
 ```
 
 ### Number of Admissions Per Patient
@@ -172,7 +161,7 @@ admission %>%
   geom_bar(mapping = aes(x = counts)) +
   labs(x = "Number of admissions per patient",
        title = "Distribution of the Number of Admissions Per Patient",
-       subtitle = "Most patients have only admitted to the hospital once.")
+       subtitle = "Most patients had only admitted to the hospital once.")
 ```
 
 ### Admission Location
@@ -182,7 +171,9 @@ admission %>%
   ggplot() +
   geom_bar(mapping = aes(x = ADMISSION_LOCATION, fill = ADMISSION_LOCATION)) +
   labs(x = "Admission Location", 
-       title = "Distribution of the Admission Location") +
+       title = "Distribution of the Admission Location",
+       subtitle = "As a result of the admission type, lots of admissions 
+       were at emergency rooms.") +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
@@ -197,7 +188,9 @@ admission %>%
   ggplot() +
   geom_bar(mapping = aes(x = INSURANCE, fill = INSURANCE)) +
   labs(x = "Insurance",
-       title = "Distribution of Patients' Insurance")
+       title = "Distribution of Patients' Insurance",
+       subtitle = "A big proportion of patients had medicare or private 
+       insurance.")
 ```
 
 ```{r}
@@ -210,7 +203,8 @@ admission %>%
   ggplot(., aes(x = LANGUAGE, y = counts)) + 
   geom_bar(stat = 'identity') + 
   labs(x = "Language",
-       title = "Distribution of Patients' Language (Top 10)") 
+       title = "Distribution of Patients' Language (Top 10)",
+       subtitle = "Most patients spoke English.") 
 ```
 
 ```{r}
@@ -220,7 +214,8 @@ admission %>%
   geom_bar(width = 1) + 
   coord_polar("y") +
   labs(y = "Religion",
-       title = "Distribution of Patients' Religion")
+       title = "Distribution of Patients' Religion",
+       subtitle = "Approximately one third of patients were Catholic.")
 ```
 
 ```{r}
@@ -229,7 +224,8 @@ admission %>%
   ggplot() +
   geom_bar(mapping = aes(x = MARITAL_STATUS, fill = MARITAL_STATUS)) +
   labs(x = "Marital Status",
-       title = "Distribution of Patients' Marital Status") +
+       title = "Distribution of Patients' Marital Status",
+       subtitle = "Many patients were married.") +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
@@ -246,7 +242,8 @@ admission %>%
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   labs(y = "Ethnicity",
-       title = "Distribution of Patients' Ethnicity (Top 10)")
+       title = "Distribution of Patients' Ethnicity (Top 10)",
+       subtitle = "The majority of patients were white.")
 ```
 
 ### Death
@@ -279,14 +276,14 @@ Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.or
 
 **Solution**
 
-First we link the 'ADMISSIONS.csv' and 'PATIENTS.csv' together.
+First, I'd like to link the 'ADMISSIONS.csv' and 'PATIENTS.csv' together.
 
 ```{r}
 patient <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
 aP <- left_join(admission, patient, by = "SUBJECT_ID")
 ```
 
-Next, we summerize some variables based on unique patients using appropriate graphs.
+Next, I will summerize some variables based on unique patients using appropriate graphs.
 
 ### Gender
 
@@ -297,7 +294,9 @@ aP %>%
   geom_bar(width = 1) + 
   coord_polar("y") +
   labs(y = "Gender",
-       title = "Distribution of Patients' Gender")
+       title = "Distribution of Patients' Gender",
+       subtitle = "There were more males than females, but their proportion
+       were almost the same.")
 ```
 
 ### Age at Admission
@@ -309,7 +308,7 @@ aP %>%
   geom_histogram(bins = 100) +
   labs(x = "Age at Admission",
        title = "Distribution of Patients' Age at Admission",
-       subtitle = "A large proportion of admissions comes from Newborns.
+       subtitle = "Age 0 (newborns) was a peak of the admissions.
        No admission from age 1 to 13.",
        caption = "Those elder than 300 are those who are older than 89 years 
        old at any time in the database have had their date of birth shifted to 
@@ -326,7 +325,7 @@ aP %>%
 - age  
 
 **Solution**
-First, we parse the 'ICUSTAYS.csv' data:
+First, parse the 'ICUSTAYS.csv' data.
 ```{r}
 ICU <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
 ```
@@ -349,10 +348,12 @@ ICU %>%
   ggplot() +
   geom_bar(mapping = aes(x = FIRST_CAREUNIT, fill = FIRST_CAREUNIT)) +
   labs(x = "First ICU Unit Care",
-       title = "Distribution of First ICU Unit")
+       title = "Distribution of First ICU Unit",
+       subtitle = "There was a big proportion of patients having MICU as 
+       their first ICU care.")
 ```
 
-To summerize the other two variables, we need to link the 'ICUSTAYS.csv' to the 'PATIENTS.csv':
+To summerize the other two variables, I'd like to link the 'ICUSTAYS.csv' to the 'PATIENTS.csv':
 
 ```{r}
 iP <- left_join(ICU, patient, by = "SUBJECT_ID")
@@ -366,7 +367,8 @@ iP %>%
   geom_bar(width = 1) + 
   coord_polar("y") +
   labs(y = "Gender",
-       title = "Distribution of ICU Patients' Gender")
+       title = "Distribution of ICU Patients' Gender",
+       subtitle = "Similar pattern as 'age at admission'")
 ```
 
 ### Age
@@ -407,7 +409,7 @@ Compile a tibble that contains the first ICU stay of unique patients, with the p
 
 **Solution**
 
-First, I grouped the patients by their SUBJECT_ID and ranked their time transfered into ICU from the earliest to the latest. Then, I extracted the earliest time, which represents their first time staying in ICU. 
+I will first get the value of first systolic blood pressure measurement and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to 'Systolic', I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made. 
 ```{r}
 temp <- chartevent %>%
           filter(ITEMID %in% sys_ID) %>%
@@ -418,6 +420,9 @@ temp <- chartevent %>%
 temp
 ```
 
+Second, since each patient can be transfered into ICU for multiple times, I only select their first time by looking for the earliest time that each patient was transfered into ICU. They are stored in the variable INTIME (first ICU stay). 
+Then, I link the corresponding demography information and the value of first systolic blood pressure measurement (VALUE) to each patient. 
+In addition, I add a variable (DIED_30) that determines if the patient died within 30 days of hospitcal admission by using (DEATHTIME - ADMITTIME). If TRUE, then this patient died within 30 days of hospital admission; if FALSE, this patient did not die within 30 days but did die after 30 days in the hospital; if NA, this patient was still alive at the time he or she was discharged from the hospital. 
 ```{r}
 ICU %>%
   group_by(SUBJECT_ID) %>%
