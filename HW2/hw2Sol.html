@@ -1036,7 +1036,7 @@ sys_ID</code></pre>
 <h3>Tibble</h3>
 <p>Compile a tibble that contains the first ICU stay of unique patients, with the patient’s demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.</p>
 <p><strong>Solution</strong></p>
-<p>I will first get the value of first systolic blood pressure measurement and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to ‘Systolic’, I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made.</p>
+<p>I will first get the value of first systolic blood pressure measurement (VALUE) and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to ‘Systolic’, I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made. As demonstrated in the table below, there were only 428 patients who had their systolic blood pressure measured. Accordingly, after I link this table to the ICU table, VALUE may contain a lot of NAs.</p>
 <pre class="r"><code>temp &lt;- chartevent %&gt;%
           filter(ITEMID %in% sys_ID) %&gt;%
           group_by(SUBJECT_ID) %&gt;%
