@@ -290,11 +290,14 @@ Next, I will summerize the gender based on unique patients.
 ```{r}
 aP %>% 
   distinct(SUBJECT_ID, .keep_all = TRUE) %>%
-  ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
-  geom_bar(width = 1) + 
-  coord_polar("y") +
-  labs(y = "Gender",
-       title = "Distribution of Patients' Gender",
+  ggplot(mapping = aes(x = GENDER, 
+                       fill = GENDER)) + 
+  geom_bar() + 
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
+  labs(title = "Distribution of Patients' Gender",
        subtitle = "There were more males than females, but their proportions
        were almost the same.")
 ```
@@ -309,7 +312,7 @@ aP %>%
   geom_histogram(bins = 100) +
   labs(x = "Age at Admission",
        title = "Distribution of Patients' Age at Admission",
-       subtitle = "Age 0 (newborns) was a peak of the admissions.
+       subtitle = "At age 0 (newborns), the admissions reached to the peak.
        No admission from age 1 to 13.",
        caption = "Those elder than 300 are those who are older than 89 years 
        old at any time in the database have had their date of birth shifted to 
@@ -367,12 +370,15 @@ iP <- left_join(ICU, patient, by = "SUBJECT_ID")
 ```{r}
 iP %>% 
   distinct(SUBJECT_ID, .keep_all = TRUE) %>%
-  ggplot(mapping = aes(x = factor(1), fill = GENDER)) + 
-  geom_bar(width = 1) + 
-  coord_polar("y") +
-  labs(y = "Gender",
-       title = "Distribution of ICU Patients' Gender",
-       subtitle = "Similar pattern as 'admission gender'")
+  ggplot(mapping = aes(x = GENDER, 
+                       fill = GENDER)) + 
+  geom_bar() + 
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
+  labs(title = "Distribution of ICU Patients' Gender",
+       subtitle = "Similar pattern as 'admission gender'.")
 ```
 
 ### Age
