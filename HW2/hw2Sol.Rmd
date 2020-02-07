@@ -125,7 +125,7 @@ admission %>%
   labs(x = "Admission hour",
        title = "Distribution of the Admission Hour",
        subtitle = "The peak hour of admissions is 7 a.m. in the morning. 
-       And there are commonly more admissions from 12 p.m. throughout midnight. ")
+       There are commonly more admissions from 12 p.m. throughout midnight. ")
 ```
 
 Further question to consider: Why those peaks?  
@@ -147,7 +147,8 @@ admission %>%
   geom_histogram(bins = 100) +
   labs(x = "Length of hospital stay (days)",
        title = "Distribution of the Length of Hospital Stay",
-       subtitle = "The majority of patients stayed in the hospital less than 50 days.")
+       subtitle = "The majority of patients stayed in the hospital less than 
+       50 days.")
 ```
 
 ### Admission Type
@@ -255,7 +256,8 @@ We should also summarise this variable based on unique patients.
 ```{r}
 admission %>% 
   distinct(SUBJECT_ID, .keep_all = TRUE) %>%
-  ggplot(mapping = aes(x = HOSPITAL_EXPIRE_FLAG, fill = HOSPITAL_EXPIRE_FLAG)) + 
+  ggplot(mapping = aes(x = HOSPITAL_EXPIRE_FLAG, 
+                       fill = HOSPITAL_EXPIRE_FLAG)) + 
   geom_bar() + 
   scale_fill_discrete(name = NULL, labels = c("Survivals", "Deaths")) +
   theme(axis.text.x=element_blank(),
@@ -263,8 +265,8 @@ admission %>%
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
   labs(title = "Number of Deaths vs. Survivals",
-       subtitle = "The majority of patients survived after their admissions 
-       to the hospital.")
+       subtitle = "The majority of patients survived after their admissions to
+       the hospital.")
 ```
 
 
@@ -309,9 +311,9 @@ aP %>%
        title = "Distribution of Patients' Age at Admission",
        subtitle = "A large proportion of admissions comes from Newborns.
        No admission from age 1 to 13.",
-       caption = "Those elder than 300 are those who are older than 89 years old at 
-       any time in the database have had their date of birth shifted to obscure their 
-       age and comply with HIPAA.")
+       caption = "Those elder than 300 are those who are older than 89 years 
+       old at any time in the database have had their date of birth shifted to 
+       obscure their age and comply with HIPAA.")
 ```
 
 ## Q3
@@ -376,9 +378,9 @@ iP %>%
   labs(x = "Age when transfered to ICU",
        title = "Distribution of ICU Patients' Age",
        subtitle = "Similar pattern as 'age at admission'",
-       caption = "Those elder than 300 are those who are older than 89 years old at 
-       any time in the database have had their date of birth shifted to obscure their 
-       age and comply with HIPAA.")
+       caption = "Those elder than 300 are those who are older than 89 years 
+       old at any time in the database have had their date of birth shifted to 
+       obscure their age and comply with HIPAA.")
 ```
 
 ## Q4 
@@ -425,6 +427,7 @@ ICU %>%
   left_join(temp, by = "SUBJECT_ID") %>%
   left_join(admission, by = "HADM_ID") %>%
   mutate(DIED_30 = ((DEATHTIME - ADMITTIME) < 30)) %>%
-  select(SUBJECT_ID.x, INTIME, GENDER, DOB, LANGUAGE, MARITAL_STATUS, VALUE, DIED_30) %>%
+  select(SUBJECT_ID.x, INTIME, GENDER, DOB, LANGUAGE, 
+         MARITAL_STATUS, VALUE, DIED_30) %>%
   print(width = Inf)
 ```
