@@ -423,7 +423,7 @@ Compile a tibble that contains the first ICU stay of unique patients, with the p
 
 **Solution**
 
-I will first get the value of first systolic blood pressure measurement and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to 'Systolic', I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made. 
+I will first get the value of first systolic blood pressure measurement and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to 'Systolic', I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made. As demonstrated in the table below, there were only 428 patients who had their systolic blood pressure measured. Accordingly, after I link this table to the ICU table, VALUE may contain a lot of NAs.
 ```{r}
 temp <- chartevent %>%
           filter(ITEMID %in% sys_ID) %>%
