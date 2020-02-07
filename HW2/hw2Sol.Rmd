@@ -295,7 +295,7 @@ aP %>%
   coord_polar("y") +
   labs(y = "Gender",
        title = "Distribution of Patients' Gender",
-       subtitle = "There were more males than females, but their proportion
+       subtitle = "There were more males than females, but their proportions
        were almost the same.")
 ```
 
@@ -349,7 +349,7 @@ ICU %>%
   geom_bar(mapping = aes(x = FIRST_CAREUNIT, fill = FIRST_CAREUNIT)) +
   labs(x = "First ICU Unit Care",
        title = "Distribution of First ICU Unit",
-       subtitle = "There was a big proportion of patients having MICU as 
+       subtitle = "A big proportion of patients had MICU as 
        their first ICU care.")
 ```
 
@@ -407,9 +407,9 @@ sys_ID <- subset(ditem$ITEMID, str_detect(ditem$LABEL, "systolic"))
 sys_ID
 ```
 
-Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
-
 ### Tibble
+
+Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
 
 **Solution**
 
