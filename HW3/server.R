@@ -1,4 +1,7 @@
 #' @import shiny
+library(gganimate)
+library(transformr)
+library("viridis")
 server <- function(input, output) {
   
   dataInput1 <- reactive({
@@ -22,8 +25,10 @@ server <- function(input, output) {
       right_join(chn_prov, by = c("Province/State" = "NAME_ENG")) %>%
       ggplot() +
       geom_sf(mapping = aes(fill = Count, geometry = geometry)) +
-      scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
-                           trans = "log10") + 
+      scale_fill_viridis(option = "B", trans = "log10", discrete = FALSE, 
+                         direction = -1) +
+      #scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
+      #                     trans = "log10") + 
       theme_bw() +
       labs(title = str_c(dataInput1(), " cases"), subtitle = dataInput2())
   })
@@ -42,6 +47,24 @@ server <- function(input, output) {
       scale_y_log10() + 
       labs(y = "Count") + 
       theme_bw()
+    
+  })
+  
+  output$plot3 <- renderPlot({
+    
+    p <- ncov_tbl %>%
+      filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
+      group_by(`Province/State`) %>%
+      ggplot() +
+      geom_col(mapping = aes(x = `Province/State`, y = `Count`, fill = `Case`)) + 
+      scale_y_log10() +
+      theme(axis.text.x = element_text(angle = 90))
+    
+    anim <- p + 
+      transition_time(Date) + 
+      labs(title = "Date: {frame_time}")
+    animate(anim, renderer = gifski_renderer())
+    anim_save("confirmed_anim.gif")
     
   })
 }
