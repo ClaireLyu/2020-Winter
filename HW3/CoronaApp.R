@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(sf)
+library(wesanderson)
 confirmed <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
 recovered <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
 death <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
@@ -130,29 +131,8 @@ chn_prov <- chn_map %>%
   count(NAME) %>%
   mutate(NAME_ENG = translate(NAME))
 
-library(wesanderson)
-
-plotdate <- "2020-02-14"
-case <- "confirmed"
-
-ncov_tbl %>%
-  filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
-  filter(Date == plotdate, Case == case) %>%
-  group_by(`Province/State`) %>%  
-  top_n(1, Date) %>% # take the latest count on that date
-  right_join(chn_prov, by = c("Province/State" = "NAME_ENG")) %>%
-  ggplot() +
-  geom_sf(mapping = aes(fill = Count, geometry = geometry)) +
-  # scale_fill_gradient(low = "white",
-  #                     high = "red",
-  #                     trans = "log10",
-  #                     limits = c(1, 50000),
-  #                     breaks = c(1, 10, 100, 1000, 10000),
-  #                     name = "") +
-  scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
-                       trans = "log10") + # can we find a better palette?
-  # #scale_fill_brewer(palette = "Dark2") + 
-  theme_bw() +
-  labs(title = str_c(case, " cases"), subtitle = plotdate)
-
+library(shiny)
+source("ui.R")
+source("server.R")
+shinyApp(ui = ui, server = server)
 
