@@ -32,7 +32,9 @@ ui <- fluidPage(
                                 start = "2020-01-22", 
                                 end = "2020-02-25")
                ),
-               mainPanel(plotOutput("plot2"))
+               mainPanel(
+                 verticalLayout(plotOutput("plot2"), plotOutput("plot3"))
+               )
              )
      ),
     
@@ -40,7 +42,7 @@ ui <- fluidPage(
              titlePanel("See How it Grew over time in Different Provinces"),
              sidebarPanel(helpText("Please wait for a couple minutes, 
                                    the gif is being generated.")),
-             flowLayout(plotOutput("plot3"))
+             flowLayout(plotOutput("plot4"))
     )
     
    )
