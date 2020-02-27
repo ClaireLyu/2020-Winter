@@ -52,6 +52,26 @@ server <- function(input, output) {
   })
   
   output$plot3 <- renderImage({
+    q <- getSymbols("^HSI",
+                    src = "yahoo", 
+                    auto.assign = FALSE, 
+                    from = min(ncov_tbl$Date),
+                    to = max(ncov_tbl$Date)) %>% 
+      as_tibble(rownames = "Date") %>%
+      mutate(Date = date(Date)) %>%
+      ggplot() + 
+      geom_line(mapping = aes(x = Date, y = HSI.Adjusted)) +
+      theme_bw()
+    
+    anim <- q + 
+      transition_reveal(Date) 
+    animate(anim)
+    anim_save("outfile1.gif")
+    list(src = "outfile1.gif",
+         contentType = 'image/gif')
+  }, deleteFile = TRUE)
+
+  output$plot4 <- renderImage({
     p <- ncov_tbl %>%
       filter(`Country/Region` %in% 
                c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -66,9 +86,9 @@ server <- function(input, output) {
       transition_time(Date) + 
       labs(title = "Date: {frame_time}")
     animate(anim)
-    anim_save("outfile.gif")
-    list(src = "outfile.gif",
+    anim_save("outfile2.gif")
+    list(src = "outfile2.gif",
          contentType = 'image/gif')
-    }, deleteFile = TRUE)
+  }, deleteFile = TRUE)
   
 }
