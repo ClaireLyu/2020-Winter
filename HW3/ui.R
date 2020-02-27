@@ -27,7 +27,7 @@ ui <- fluidPage(
     
     tabPanel("Line Graph", 
              
-             titlePanel("Select Dates to Have a Closer Look..."),
+             titlePanel("Select Dates to Have a Comparison among Different Cases..."),
              
              sidebarLayout(
                sidebarPanel(
@@ -44,7 +44,10 @@ ui <- fluidPage(
     
     tabPanel("Counts", 
              
-             titlePanel("See How it Grew in Different Provinces"),
+             titlePanel("See How it Grew over time in Different Provinces"),
+             
+             sidebarPanel(helpText("Please wait for a couple minutes, 
+                                   the gif is being generated.")),
              
              flowLayout(plotOutput("plot3"))
     )
