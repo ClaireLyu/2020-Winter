@@ -18,12 +18,8 @@ server <- function(input, output) {
   dataInput3 <- reactive({
     
     ncov_tbl %>%
-      filter(`Country/Region` %in% 
-               c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
-      getSymbols(src = "yahoo", 
-               from = input$dates[1],
-               to = input$dates[2],
-               auto.assign = FALSE)
+      filter(ncov_tbl$Date %in% input$dates[1]:input$dates[2])
+    
   })
   
   output$plot1 <- renderPlot({
@@ -47,6 +43,8 @@ server <- function(input, output) {
   output$plot2 <- renderPlot({
     
     dataInput3() %>%
+      filter(`Country/Region` %in% 
+               c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
       group_by(Date, Case) %>%  
       summarise(total_count = sum(Count)) %>%
       ggplot() +
