@@ -2,6 +2,7 @@ library(tidyverse)
 library(lubridate)
 library(sf)
 library(wesanderson)
+
 confirmed <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
 recovered <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
 death <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
@@ -39,14 +40,10 @@ chn_map <- st_read("./bou2_4p.shp", as_tibble = TRUE) %>%
 #Draw the China map
 chn_map %>%
   ggplot() + 
-  geom_sf(mapping = aes(geometry = geometry), color = "black", fill = "white") + 
+  geom_sf(mapping = aes(geometry = geometry), color = "black", 
+          fill = "white") + 
   #geom_sf_label(mapping = aes(label = NAME)) + 
   theme_bw()
-
-#
-ncov_tbl %>%
-  filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
-  distinct(`Province/State`, `Country/Region`) 
 
 translate <- function(x) {
   sapply(x, function(chn_name) {
