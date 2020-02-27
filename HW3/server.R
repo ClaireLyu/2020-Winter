@@ -15,6 +15,17 @@ server <- function(input, output) {
     date <- input$date
   })
   
+  dataInput3 <- reactive({
+    
+    ncov_tbl %>%
+      filter(`Country/Region` %in% 
+               c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
+      getSymbols(src = "yahoo", 
+               from = input$dates[1],
+               to = input$dates[2],
+               auto.assign = FALSE)
+  })
+  
   output$plot1 <- renderPlot({
     ncov_tbl %>%
       filter(`Country/Region` %in% 
@@ -35,9 +46,7 @@ server <- function(input, output) {
   
   output$plot2 <- renderPlot({
     
-    ncov_tbl %>%
-      filter(`Country/Region` %in% 
-               c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
+    dataInput3() %>%
       group_by(Date, Case) %>%  
       summarise(total_count = sum(Count)) %>%
       ggplot() +
@@ -65,6 +74,7 @@ server <- function(input, output) {
       labs(title = "Date: {frame_time}")
     animate(anim, renderer = gifski_renderer())
     anim_save("confirmed_anim.gif")
+    print("confirmed_anim.gif")
     
   })
 }
