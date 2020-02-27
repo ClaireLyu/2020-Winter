@@ -57,7 +57,7 @@ server <- function(input, output) {
     
   })
   
-  output$plot3 <- renderPlot({
+  output$plot3 <- renderImage({
     
     p <- ncov_tbl %>%
       filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -70,9 +70,13 @@ server <- function(input, output) {
     anim <- p + 
       transition_time(Date) + 
       labs(title = "Date: {frame_time}")
-    animate(anim, renderer = gifski_renderer())
-    anim_save("confirmed_anim.gif")
-    print("confirmed_anim.gif")
-    
-  })
+    animate(anim)
+    anim_save("outfile.gif")
+    list(src = "outfile.gif",
+         contentType = 'image/gif'
+         # width = 600,
+         # height = 500,
+         # alt = "This is alternate text"
+    )}, deleteFile = TRUE)
+
 }
