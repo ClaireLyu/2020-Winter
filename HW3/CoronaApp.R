@@ -3,9 +3,18 @@ library(lubridate)
 library(sf)
 library(wesanderson)
 
-confirmed <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
-recovered <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
-death <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
+confirm_html <- str_c("https://raw.githubusercontent.com/CSSEGISandData/",
+                      "COVID-19/master/csse_covid_19_data/csse_covid_19_time_",
+                      "series/time_series_19-covid-Confirmed.csv")
+recovered_html <- str_c("https://raw.githubusercontent.com/CSSEGISandData/",
+                        "COVID-19/master/csse_covid_19_data/csse_covid_19_time_",
+                        "series/time_series_19-covid-Recovered.csv")
+death_html <- str_c("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/",
+                    "master/csse_covid_19_data/csse_covid_19_time_series/time",
+                    "_series_19-covid-Deaths.csv")
+confirmed <- read_csv(confirm_html)
+recovered <- read_csv(recovered_html)
+death <- read_csv(death_html)
 
 confirmed_long <- confirmed %>%
   pivot_longer(-(`Province/State`:Long), 
