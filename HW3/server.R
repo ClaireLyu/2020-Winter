@@ -16,10 +16,8 @@ server <- function(input, output) {
   })
   
   dataInput3 <- reactive({
-    
     ncov_tbl %>%
       filter(ncov_tbl$Date %in% input$dates[1]:input$dates[2])
-    
   })
   
   output$plot1 <- renderPlot({
@@ -34,14 +32,11 @@ server <- function(input, output) {
       geom_sf(mapping = aes(fill = Count, geometry = geometry)) +
       scale_fill_viridis(option = "B", trans = "log10", discrete = FALSE, 
                          direction = -1) +
-      #scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
-      #                     trans = "log10") + 
       theme_bw() +
       labs(title = str_c(dataInput1(), " cases"), subtitle = dataInput2())
   })
   
   output$plot2 <- renderPlot({
-    
     dataInput3() %>%
       filter(`Country/Region` %in% 
                c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -54,16 +49,16 @@ server <- function(input, output) {
       scale_y_log10() + 
       labs(y = "Count") + 
       theme_bw()
-    
   })
   
   output$plot3 <- renderImage({
-    
     p <- ncov_tbl %>%
-      filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
+      filter(`Country/Region` %in% 
+               c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
       group_by(`Province/State`) %>%
       ggplot() +
-      geom_col(mapping = aes(x = `Province/State`, y = `Count`, fill = `Case`)) + 
+      geom_col(mapping = aes(x = `Province/State`, 
+                             y = `Count`, fill = `Case`)) + 
       scale_y_log10() +
       theme(axis.text.x = element_text(angle = 90))
     
@@ -73,10 +68,7 @@ server <- function(input, output) {
     animate(anim)
     anim_save("outfile.gif")
     list(src = "outfile.gif",
-         contentType = 'image/gif'
-         # width = 600,
-         # height = 500,
-         # alt = "This is alternate text"
-    )}, deleteFile = TRUE)
-
+         contentType = 'image/gif')
+    }, deleteFile = TRUE)
+  
 }
