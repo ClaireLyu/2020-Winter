@@ -37,14 +37,6 @@ chn_map <- st_read("./bou2_4p.shp", as_tibble = TRUE) %>%
          BOU2_4M_ID = as.integer(BOU2_4M_ID)) %>%
   mutate(NAME = str_replace_na(NAME, replacement = "澳门特别行政区")) 
 
-#Draw the China map
-chn_map %>%
-  ggplot() + 
-  geom_sf(mapping = aes(geometry = geometry), color = "black", 
-          fill = "white") + 
-  #geom_sf_label(mapping = aes(label = NAME)) + 
-  theme_bw()
-
 translate <- function(x) {
   sapply(x, function(chn_name) {
     if (str_detect(chn_name, "澳门")) {
