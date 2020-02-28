@@ -51,7 +51,7 @@ server <- function(input, output) {
       theme_bw()
   })
   
-  output$plot2 <- renderImage({
+  output$plot4 <- renderImage({
     q <- getSymbols("^HSI",
                     src = "yahoo", 
                     auto.assign = FALSE, 
@@ -71,7 +71,7 @@ server <- function(input, output) {
          contentType = 'image/gif')
   }, deleteFile = TRUE)
 
-  output$plot4 <- renderImage({
+  output$plot2 <- renderImage({
     p <- ncov_tbl %>%
       filter(`Country/Region` %in% 
                c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
