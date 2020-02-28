@@ -43,7 +43,7 @@ ui <- fluidPage(
              )
      ),
     
-    tabPanel("Counts", 
+    tabPanel("Stock", 
              titlePanel("See How it affects the stock over time"),
              sidebarPanel(helpText("Please wait for a couple minutes, 
                                    the gif is being generated.")),
