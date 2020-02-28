@@ -8,13 +8,16 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  helpText("Create demographic maps with 
-                          data from JHU on 2019-nCoV Outbreak."),
+                          data from JHU on 2019-nCoV Outbreak.",
+                          "Note: it may take a minute to generate the image...
+                          SORRY"),
                  radioButtons("case", "Select A Case Category:",
                               c("Confirmed" = "c",
                                 "Recovered" = "r",
                                 "Death" = "d")
                               ),
-                 dateInput("date", "Select a date:", value = as.character(Sys.Date() - 2), 
+                 dateInput("date", "Select a date:", 
+                           value = as.character(Sys.Date() - 2), 
                            format = "mm/dd/yy"),
                ),
                mainPanel(plotOutput("plot1"))
@@ -23,8 +26,8 @@ ui <- fluidPage(
     
     tabPanel("Counts", 
              titlePanel("See How it Grew over time in Different Provinces"),
-             sidebarPanel(helpText("Please wait for a couple minutes, 
-                                   the gif is being generated.")),
+             sidebarPanel(helpText("Please count down for one minute, 
+                                   the GIF is being generated.")),
              flowLayout(plotOutput("plot2"))
     ),
     
@@ -33,7 +36,9 @@ ui <- fluidPage(
                         Different Cases..."),
              sidebarLayout(
                sidebarPanel(
-                 helpText("Create a line graph with selected time interval."),
+                 helpText("Create a line graph with selected time interval.",
+                          "Note: it may take a minute to generate the image...
+                          SORRY"),
                  dateRangeInput("dates", 
                                 "Select the range of date:",
                                 start = "2020-01-22", 
@@ -45,8 +50,8 @@ ui <- fluidPage(
     
     tabPanel("Stock", 
              titlePanel("See How it affects the stock over time"),
-             sidebarPanel(helpText("Please wait for a couple minutes, 
-                                   the gif is being generated.")),
+             sidebarPanel(helpText("Please count down for one minute, 
+                                   the GIF is being generated.")),
              flowLayout(plotOutput("plot4"))
     )
     
