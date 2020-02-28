@@ -1,6 +1,8 @@
 #' @import shiny
 library(gganimate)
 library(transformr)
+library(quantmod)
+library(gifski)
 library("viridis")
 source("data.R")
 
@@ -65,9 +67,10 @@ server <- function(input, output) {
       geom_line(mapping = aes(x = Date, y = HSI.Adjusted)) +
       theme_bw()
     
-    anim <- q + 
+    anim1 <- q + 
       transition_reveal(Date) 
-    anim_save("outfile1.gif", animation = anim)
+    animate(anim1)
+    anim_save(filename = "outfile1.gif")
     list(src = "outfile1.gif",
          contentType = 'image/gif')
   })
@@ -83,10 +86,11 @@ server <- function(input, output) {
       scale_y_log10() +
       theme(axis.text.x = element_text(angle = 90))
     
-    anim <- p + 
+    anim2 <- p + 
       transition_time(Date) + 
       labs(title = "Date: {frame_time}")
-    anim_save("outfile2.gif", animation = anim)
+    animate(anim2)
+    anim_save(filename = "outfile2.gif")
     list(src = "outfile2.gif",
          contentType = 'image/gif')
   })
