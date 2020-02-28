@@ -36,7 +36,7 @@ server <- function(input, output) {
       labs(title = str_c(dataInput1(), " cases"), subtitle = dataInput2())
   })
   
-  output$plot2 <- renderPlot({
+  output$plot3 <- renderPlot({
     dataInput3() %>%
       filter(`Country/Region` %in% 
                c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -51,7 +51,7 @@ server <- function(input, output) {
       theme_bw()
   })
   
-  output$plot3 <- renderImage({
+  output$plot2 <- renderImage({
     q <- getSymbols("^HSI",
                     src = "yahoo", 
                     auto.assign = FALSE, 
