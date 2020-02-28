@@ -67,11 +67,10 @@ server <- function(input, output) {
     
     anim <- q + 
       transition_reveal(Date) 
-    animate(anim)
-    anim_save("outfile1.gif")
+    anim_save("outfile1.gif", animation = anim)
     list(src = "outfile1.gif",
          contentType = 'image/gif')
-  }, deleteFile = TRUE)
+  })
 
   output$plot2 <- renderImage({
     p <- ncov_tbl %>%
@@ -87,10 +86,9 @@ server <- function(input, output) {
     anim <- p + 
       transition_time(Date) + 
       labs(title = "Date: {frame_time}")
-    animate(anim)
-    anim_save("outfile2.gif")
+    anim_save("outfile2.gif", animation = anim)
     list(src = "outfile2.gif",
          contentType = 'image/gif')
-  }, deleteFile = TRUE)
+  })
   
 }
