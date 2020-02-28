@@ -2,6 +2,7 @@
 library(gganimate)
 library(transformr)
 library("viridis")
+source("data.R")
 server <- function(input, output) {
   
   dataInput1 <- reactive({
