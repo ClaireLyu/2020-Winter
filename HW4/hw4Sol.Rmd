@@ -11,8 +11,10 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Introduction
 
-## Connect to PostgresSQL database
+
+## Data Preparation
 
 Load database libraries and the tidyverse frontend:
 ```{r}
@@ -21,6 +23,7 @@ library(RPostgreSQL)
 library(tidyverse)
 library(dplyr)
 library(lubridate)
+library(ggplot2)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
@@ -95,7 +98,7 @@ study_admissions %>%
 ```{r}
 study_admissions %>%
   mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
-  mutate(mortality = tt_death <= 30) %>%
+  mutate(mortality = ifelse(is.na(tt_death <= 30), FALSE, tt_death <= 30)) %>%
   mutate(age = date_part("year", admittime) - date_part("year", dob)) %>%
   filter(age < 90) %>%
   mutate(age = age - ifelse(
@@ -177,4 +180,96 @@ study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
+```{r}
+study_admissions %>%
+  distinct(.keep_all = T) %>%
+  print() -> study_admissions
+```
 
+## Data Visualization
+
+```{r}
+study_admissions %>% 
+  collect() %>%
+  distinct(subject_id, .keep_all = T) %>%
+  ggplot(aes(x = age)) + 
+  geom_histogram(bins = 100) +
+  labs(x = "Age", title = "Patient's Age")
+```
+
+```{r}
+study_admissions %>% 
+  collect() %>%
+  distinct(subject_id, .keep_all = TRUE) %>%
+  ggplot(mapping = aes(x = gender, 
+                       fill = gender)) + 
+  geom_bar() + 
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
+  labs(title = "Distribution of Patients' Gender")
+```
+```{r}
+study_admissions %>% 
+  collect() %>%
+  distinct(subject_id, .keep_all = TRUE) %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = ethnic_group, fill = ethnic_group)) +
+  labs(y = "Ethnic Group",
+       title = "Distribution of Patients' Ethnicity")
+```
+```{r}
+study_admissions %>% 
+  collect() %>%
+  distinct(subject_id, .keep_all = TRUE) %>%
+  ggplot(mapping = aes(x = mortality, 
+                       fill = mortality)) + 
+  geom_bar() + 
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
+  labs(title = "Distribution of Mortality among Patients")
+```
+```{r}
+study_admissions %>% 
+  collect() %>%
+  ggplot(mapping = aes(x = principal_dx, 
+                       fill = principal_dx)) + 
+  geom_bar() + 
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank()) +
+  geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
+  labs(title = "Distribution of Principal among Admissions")
+```
+```{r}
+study_admissions %>% 
+  collect() %>%
+  ggplot(mapping = aes(x = drg_severity, 
+                       fill = drg_severity)) + 
+  geom_bar() + 
+  labs(title = "Distribution of Severity among Admissions")
+```
+
+```{r}
+study_admissions %>% 
+  collect() %>%
+  group_by(icd9_code) %>%
+  summarise(counts = n()) %>%
+  arrange(desc(counts)) %>%
+  slice(2:11) %>%
+  ggplot(., aes(x = icd9_code, y = counts)) + 
+  geom_bar(stat = 'identity') + 
+  labs(x = "Diagnostics Type",
+       title = "Distribution of Diagnostics Type (Top 10)")
+```
+
+## Analytics
+```{r}
+model <- glm(mortality ~ age + mortality + drg_severity + icd9_code
+             + principal_dx + gender + ethnic_group, data = study_admissions)
+summary(model)
+
+## Conclusion
