@@ -294,34 +294,9 @@ testing %>%
   select(mortality) %>%
   print() -> ytest
 ```
-
-# Logistics Regression
-```{r}
-library(keras)
-mlogit <- keras_model_sequential() 
-mlogit %>% 
-#  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
-#  layer_dropout(rate = 0.4) %>% 
-  layer_dense(units = 10, activation = 'softmax', input_shape = c(136))
-summary(mlogit)
-# compile model
-mlogit %>% compile(
-  loss = 'categorical_crossentropy',
-  optimizer = optimizer_rmsprop(),
-  metrics = c('accuracy')
-)
-# fit model
-mlogit_history <- mlogit %>% fit(
-  xtrain, ytrain, 
-  epochs = 20, batch_size = 128, 
-  validation_split = 0.25
-)
-# Evaluate model performance on the test data:
-mlogit %>% evaluate(xtest, ytest)
-```
-
 # Neural Network
 ```{r}
+library(keras)
 model <- keras_model_sequential() 
 model %>% 
   layer_dense(units = 256, activation = 'relu', input_shape = c(136)) %>% 
@@ -345,4 +320,32 @@ history <- model %>% fit(
 # Evaluate model performance on the test data:
 model %>% evaluate(xtest, ytest)
 ```
+
+# Logistics Regression
+```{r}
+library(keras)
+mlogit <- keras_model_sequential() 
+mlogit %>% 
+#  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
+#  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 10, activation = 'softmax', input_shape = c(136))
+summary(mlogit)
+
+# compile model
+mlogit %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_rmsprop(),
+  metrics = c('accuracy')
+)
+# fit model
+mlogit_history <- mlogit %>% fit(
+  xtrain, ytrain, 
+  epochs = 20, batch_size = 128, 
+  validation_split = 0.25
+)
+# Evaluate model performance on the test data:
+mlogit %>% evaluate(xtest, ytest)
+```
+
+
 ## Conclusion
