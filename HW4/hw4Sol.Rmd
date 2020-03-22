@@ -2,10 +2,10 @@
 title: "Biostat 203B Homework 4"
 subtitle: Due ~~Mar 20~~ Mar 22 @ 11:59PM
 output:
-  # ioslides_presentation: default
   html_document:
     toc: true
     toc_depth: 4
+  # ioslides_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -268,13 +268,41 @@ study_admissions %>%
 ```
 
 ## Analytics
-# Logistic Regression
+
+# Split Data into a training and a validation set
 ```{r}
-model <- glm(mortality ~ age + drg_severity + icd9_code
-             + principal_dx + gender + ethnic_group, family = binomial,
-             data = study_admissions)
-summary(model)
+library(ISLR)
+set.seed(123)
+smp_siz = floor(0.75*nrow(collect(study_admissions)))
+train_ind = sample(seq_len(nrow(collect(study_admissions))), size = smp_siz)  
+training = collect(study_admissions)[train_ind, ] 
+testing = collect(study_admissions)[-train_ind, ]
 ```
+
+# Logistics Regression
+```{r}
+mlogit <- keras_model_sequential() 
+mlogit %>% 
+#  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
+#  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 10, activation = 'softmax', input_shape = c(784))
+summary(mlogit)
+# compile model
+mlogit %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_rmsprop(),
+  metrics = c('accuracy')
+)
+# fit model
+mlogit_history <- mlogit %>% fit(
+  training, 
+  epochs = 20, batch_size = 128, 
+  validation_split = 0.25
+)
+# Evaluate model performance on the test data:
+mlogit %>% evaluate(testing)
+```
+
 # Neural Network
 ```{r}
 library(keras)
@@ -286,16 +314,19 @@ model %>%
   layer_dropout(rate = 0.3) %>%
   layer_dense(units = 10, activation = 'softmax')
 summary(model)
+# compile model
 model %>% compile(
   loss = 'categorical_crossentropy',
   optimizer = optimizer_rmsprop(),
   metrics = c('accuracy')
 )
+# fit model
 history <- model %>% fit(
-  study_admissions, 
+  training, 
   epochs = 30, batch_size = 128, 
-  validation_split = 0.2
+  validation_split = 0.25
 )
-model %>% evaluate(study_admissions)
+# Evaluate model performance on the test data:
+model %>% evaluate(testing)
 ```
 ## Conclusion
