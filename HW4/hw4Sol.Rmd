@@ -1,0 +1,20 @@
+library(DBI)
+library(RPostgreSQL)
+library(tidyverse)
+library(lubridate)
+# Load configuration settings
+dbdriver <- 'PostgreSQL'
+user  <- 'postgres'
+password <- 'postgres'
+dbname <- 'mimic'
+schema <- 'mimiciii'
+# Connect to the database using the configuration settings
+con <- dbConnect(RPostgreSQL::PostgreSQL(), 
+                 dbname = dbname, 
+                 #host = host, 
+                 #port = port, 
+                 user = user, 
+                 password = password)
+# Set the default schema
+dbExecute(con, paste("SET search_path TO ", schema, sep=" "))
+dbListTables(con)
