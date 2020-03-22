@@ -293,57 +293,74 @@ testing %>%
 testing %>%
   select(mortality) %>%
   print() -> ytest
+dim(xtrain)
+dim(ytest)
 ```
 # Neural Network
+
+Define a **sequential model** (a linear stack of layers) with 2 fully-connected hidden layers (256 and 128 neurons):
 ```{r}
 library(keras)
 model <- keras_model_sequential() 
 model %>% 
-  layer_dense(units = 256, activation = 'relu', input_shape = c(136)) %>% 
+  layer_dense(units = 256, activation = 'relu', input_shape = c(8)) %>% 
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
-  layer_dense(units = 10, activation = 'softmax')
+  layer_dense(units = 1, activation = 'softmax')
 summary(model)
-# compile model
+```
+Compile the model with appropriate loss function, optimizer, and metrics:
+```{r}
 model %>% compile(
   loss = 'categorical_crossentropy',
   optimizer = optimizer_rmsprop(),
   metrics = c('accuracy')
 )
-# fit model
+```
+Fit the model by using the training data:
+```{r}
 history <- model %>% fit(
   xtrain, ytrain, 
   epochs = 30, batch_size = 128, 
   validation_split = 0.25
 )
-# Evaluate model performance on the test data:
+```
+Evaluate model performance on the test data:
+```{r}
 model %>% evaluate(xtest, ytest)
 ```
 
 # Logistics Regression
+
+We fit the same model using keras, since multinomial-logit is just an MLP with (1) one input layer with linear activation and (2) one output layer with softmax link function.
 ```{r}
 library(keras)
 mlogit <- keras_model_sequential() 
 mlogit %>% 
 #  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
 #  layer_dropout(rate = 0.4) %>% 
-  layer_dense(units = 10, activation = 'softmax', input_shape = c(136))
+  layer_dense(units = 1, activation = 'softmax', input_shape = c(8))
 summary(mlogit)
-
-# compile model
+```
+Compile the model with appropriate loss function, optimizer, and metrics:
+```{r}
 mlogit %>% compile(
   loss = 'categorical_crossentropy',
   optimizer = optimizer_rmsprop(),
   metrics = c('accuracy')
 )
-# fit model
+```
+Fit the model by using the training data:
+```{r}
 mlogit_history <- mlogit %>% fit(
   xtrain, ytrain, 
   epochs = 20, batch_size = 128, 
   validation_split = 0.25
 )
-# Evaluate model performance on the test data:
+```
+Evaluate model performance on the test data:
+```{r}
 mlogit %>% evaluate(xtest, ytest)
 ```
 
