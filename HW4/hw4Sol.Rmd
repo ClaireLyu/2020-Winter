@@ -293,8 +293,6 @@ testing %>%
 testing %>%
   select(mortality) %>%
   print() -> ytest
-dim(xtrain)
-dim(ytest)
 ```
 # Neural Network
 
@@ -307,7 +305,7 @@ model %>%
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
-  layer_dense(units = 1, activation = 'softmax')
+  layer_dense(units = 2, activation = 'softmax')
 summary(model)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
@@ -322,8 +320,8 @@ Fit the model by using the training data:
 ```{r}
 history <- model %>% fit(
   xtrain, ytrain, 
-  epochs = 30, batch_size = 128, 
-  validation_split = 0.25
+  epochs = 15, batch_size = 128, 
+  validation_split = 0.2
 )
 ```
 Evaluate model performance on the test data:
@@ -356,7 +354,7 @@ Fit the model by using the training data:
 mlogit_history <- mlogit %>% fit(
   xtrain, ytrain, 
   epochs = 20, batch_size = 128, 
-  validation_split = 0.25
+  validation_split = 0.2
 )
 ```
 Evaluate model performance on the test data:
