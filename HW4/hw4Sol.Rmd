@@ -1,7 +1,29 @@
+---
+title: "Biostat 203B Homework 4"
+subtitle: Due ~~Mar 20~~ Mar 22 @ 11:59PM
+output:
+  # ioslides_presentation: default
+  html_document:
+    toc: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Connect to PostgresSQL database
+
+Load database libraries and the tidyverse frontend:
+```{r}
 library(DBI)
 library(RPostgreSQL)
 library(tidyverse)
 library(lubridate)
+```
+
+Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
+```{r}
 # Load configuration settings
 dbdriver <- 'PostgreSQL'
 user  <- 'postgres'
@@ -18,3 +40,10 @@ con <- dbConnect(RPostgreSQL::PostgreSQL(),
 # Set the default schema
 dbExecute(con, paste("SET search_path TO ", schema, sep=" "))
 dbListTables(con)
+```
+
+```{r}
+tbl(con, "d_icd_diagnoses") %>%
+  filter(str_detect(tolower(long_title), "tuberculo")) %>%
+  print() -> tuber_codes
+```
