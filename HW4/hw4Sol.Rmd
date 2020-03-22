@@ -194,7 +194,7 @@ study_admissions %>%
   distinct(subject_id, .keep_all = T) %>%
   ggplot(aes(x = age)) + 
   geom_histogram(bins = 100) +
-  labs(x = "Age", title = "Patient's Age")
+  labs(x = "Age", title = "Distribution of Age among Patient")
 ```
 
 ```{r}
@@ -208,7 +208,7 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Patients' Gender")
+  labs(title = "Distribution of Gender among Patient")
 ```
 ```{r}
 study_admissions %>% 
@@ -216,8 +216,8 @@ study_admissions %>%
   distinct(subject_id, .keep_all = TRUE) %>%
   ggplot() +
   geom_bar(mapping = aes(x = ethnic_group, fill = ethnic_group)) +
-  labs(y = "Ethnic Group",
-       title = "Distribution of Patients' Ethnicity")
+  labs(x = "Ethnic Group", y = "Counts",
+       title = "Distribution of Ethnicity among Patient")
 ```
 ```{r}
 study_admissions %>% 
@@ -230,7 +230,7 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Mortality among Patients")
+  labs(title = "Distribution of Mortality among Patient")
 ```
 ```{r}
 study_admissions %>% 
@@ -242,7 +242,7 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Principal among Admissions")
+  labs(title = "Distribution of Principal Diagnose among Admissions")
 ```
 ```{r}
 study_admissions %>% 
@@ -250,7 +250,8 @@ study_admissions %>%
   ggplot(mapping = aes(x = drg_severity, 
                        fill = drg_severity)) + 
   geom_bar() + 
-  labs(title = "Distribution of Severity among Admissions")
+  labs(x = "Severity Level", y = "Counts",
+    title = "Distribution of Severity Level among Admissions")
 ```
 
 ```{r}
@@ -268,8 +269,9 @@ study_admissions %>%
 
 ## Analytics
 ```{r}
-model <- glm(mortality ~ age + mortality + drg_severity + icd9_code
-             + principal_dx + gender + ethnic_group, data = study_admissions)
+model <- glm(mortality ~ age + drg_severity + icd9_code
+             + principal_dx + gender + ethnic_group, family = binomial,
+             data = study_admissions)
 summary(model)
-
+```
 ## Conclusion
