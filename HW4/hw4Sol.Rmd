@@ -268,10 +268,34 @@ study_admissions %>%
 ```
 
 ## Analytics
+# Logistic Regression
 ```{r}
 model <- glm(mortality ~ age + drg_severity + icd9_code
              + principal_dx + gender + ethnic_group, family = binomial,
              data = study_admissions)
 summary(model)
+```
+# Neural Network
+```{r}
+library(keras)
+model <- keras_model_sequential() 
+model %>% 
+  layer_dense(units = 256, activation = 'relu', input_shape = c(784)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 128, activation = 'relu') %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 10, activation = 'softmax')
+summary(model)
+model %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_rmsprop(),
+  metrics = c('accuracy')
+)
+history <- model %>% fit(
+  study_admissions, 
+  epochs = 30, batch_size = 128, 
+  validation_split = 0.2
+)
+model %>% evaluate(study_admissions)
 ```
 ## Conclusion
