@@ -19,6 +19,7 @@ Load database libraries and the tidyverse frontend:
 library(DBI)
 library(RPostgreSQL)
 library(tidyverse)
+library(dplyr)
 library(lubridate)
 ```
 
@@ -39,7 +40,6 @@ con <- dbConnect(RPostgreSQL::PostgreSQL(),
                  password = password)
 # Set the default schema
 dbExecute(con, paste("SET search_path TO ", schema, sep=" "))
-dbListTables(con)
 ```
 
 ```{r}
@@ -47,3 +47,134 @@ tbl(con, "d_icd_diagnoses") %>%
   filter(str_detect(tolower(long_title), "tuberculo")) %>%
   print() -> tuber_codes
 ```
+
+```{r}
+tbl(con, "diagnoses_icd") %>%
+  semi_join(tuber_codes, by = "icd9_code") %>%
+  filter(seq_num <= 5) %>%
+  group_by(subject_id, hadm_id) %>%
+  filter(min_rank(seq_num) <= 1) %>%
+  ungroup() %>%
+  select(subject_id, hadm_id, icd9_code, seq_num) %>%
+  print() -> study_admissions
+```
+
+
+```{r}
+study_admissions %>%
+  mutate(principal_dx = seq_num == 1) %>%
+  select(-seq_num) %>%
+  print() -> study_admissions
+```
+
+```{r}
+tbl(con, "drgcodes") %>%
+  filter(str_detect(drg_type, "APR")) %>%
+  select(subject_id, hadm_id, drg_severity) %>%
+  right_join(study_admissions, by = c("subject_id", "hadm_id")) %>%
+  mutate(drg_severity = ifelse(is.na(drg_severity), 1, drg_severity)) %>%
+  print() -> study_admissions
+```
+
+```{r}
+study_admissions %>%
+  left_join(
+    select(tbl(con, "admissions"),
+           subject_id, hadm_id, admittime, dischtime, hospital_expire_flag
+    ), by = c("subject_id", "hadm_id")
+  ) %>%
+  filter(hospital_expire_flag == 0) %>% # patients who did not die in hospital
+  select(-hospital_expire_flag) %>%
+  left_join(
+    select(tbl(con, "patients"), subject_id, dob, dod),
+    by = "subject_id"
+  ) %>%
+  print(width = Inf) -> study_admissions
+```
+
+```{r}
+study_admissions %>%
+  mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
+  mutate(mortality = tt_death <= 30) %>%
+  mutate(age = date_part("year", admittime) - date_part("year", dob)) %>%
+  filter(age < 90) %>%
+  mutate(age = age - ifelse(
+    date_part("month", admittime) < date_part("month", dob) |
+      (
+        date_part("month", admittime) == date_part("month", dob) &
+          date_part("day", admittime) < date_part("day", dob)
+      ),
+    1,
+    0
+  )) %>%
+  select(-admittime, -dischtime, -dob, -dod, -tt_death) %>%
+  select(subject_id, hadm_id, age, mortality, everything()) %>%
+  print() -> study_admissions
+```
+
+```{r}
+tbl(con, "admissions") %>%
+  select(subject_id, ethnicity) %>%
+  distinct() %>%
+  print() -> study_subjects
+tbl(con, "patients") %>%
+  select(subject_id, gender) %>%
+  distinct() %>%
+  full_join(study_subjects, by = "subject_id") %>%
+  print() -> study_subjects
+study_subjects %>%
+  semi_join(study_admissions, by = "subject_id") %>%
+  print() -> study_subjects
+```
+
+```{r}
+unknown_ethnicity <- c(
+  "OTHER",
+  "UNABLE TO OBTAIN",
+  "UNKNOWN/NOT SPECIFIED",
+  "MULTI RACE ETHNICITY",
+  "PATIENT DECLINED TO ANSWER",
+  "UNKNOWN"
+)
+
+study_subjects %>%
+  collect() %>%
+  mutate(ethnic_group = case_when(
+    str_detect(ethnicity, "^ASIAN") ~ "ASIAN",
+    str_detect(ethnicity, "^BLACK") ~ "BLACK",
+    str_detect(ethnicity, "^HISPANIC") ~ "HISPANIC",
+    str_detect(ethnicity, "^WHITE") ~ "WHITE",
+    ethnicity %in% unknown_ethnicity ~ NA_character_,
+    TRUE ~ NA_character_
+  )) %>%
+  select(subject_id, gender, ethnic_group) %>%
+  print() -> study_subjects
+```
+
+```{r}
+most <- function(x) {
+  if (all(is.na(x))) return(NA_character_)
+  y <- table(x, useNA = "no")
+  if (length(which(y == max(y))) > 1) return(NA_character_)
+  return(names(y)[which.max(y)])
+}
+
+study_subjects %>%
+  group_by(subject_id) %>%
+  summarize(ethnic_group = most(ethnic_group)) %>%
+  ungroup() %>%
+  mutate(ethnic_group = ifelse(is.na(ethnic_group), "UNKNOWN", ethnic_group)) %>%
+  print() -> subject_ethnic_groups
+
+study_subjects %>%
+  select(subject_id, gender) %>%
+  left_join(subject_ethnic_groups, by = "subject_id") %>%
+  print() -> study_subjects
+```
+
+```{r}
+study_admissions %>%
+  left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
+  print() -> study_admissions
+```
+
