@@ -11,8 +11,12 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Introduction
+### 30-Day Mortality Rate of Myocardia Infarction Patients
 
+## Introduction
+MIMIC-III (Medical Information Mart for Intensive Care III) is a large, freely-available database comprising deidentified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
+
+The database includes information such as demographics, vital sign measurements made at the bedside (~1 data point per hour), laboratory test results, procedures, medications, caregiver notes, imaging reports, and mortality (both in and out of hospital).
 
 ## Data Preparation
 
@@ -277,15 +281,28 @@ smp_siz = floor(0.75*nrow(collect(study_admissions)))
 train_ind = sample(seq_len(nrow(collect(study_admissions))), size = smp_siz)  
 training = collect(study_admissions)[train_ind, ] 
 testing = collect(study_admissions)[-train_ind, ]
+training %>%
+  select(-mortality) %>%
+  print() -> xtrain
+training %>%
+  select(mortality) %>%
+  print() -> ytrain
+testing %>%
+  select(-mortality) %>%
+  print() -> xtest
+testing %>%
+  select(mortality) %>%
+  print() -> ytest
 ```
 
 # Logistics Regression
 ```{r}
+library(keras)
 mlogit <- keras_model_sequential() 
 mlogit %>% 
 #  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
 #  layer_dropout(rate = 0.4) %>% 
-  layer_dense(units = 10, activation = 'softmax', input_shape = c(784))
+  layer_dense(units = 10, activation = 'softmax', input_shape = c(136))
 summary(mlogit)
 # compile model
 mlogit %>% compile(
@@ -295,20 +312,19 @@ mlogit %>% compile(
 )
 # fit model
 mlogit_history <- mlogit %>% fit(
-  training, 
+  xtrain, ytrain, 
   epochs = 20, batch_size = 128, 
   validation_split = 0.25
 )
 # Evaluate model performance on the test data:
-mlogit %>% evaluate(testing)
+mlogit %>% evaluate(xtest, ytest)
 ```
 
 # Neural Network
 ```{r}
-library(keras)
 model <- keras_model_sequential() 
 model %>% 
-  layer_dense(units = 256, activation = 'relu', input_shape = c(784)) %>% 
+  layer_dense(units = 256, activation = 'relu', input_shape = c(136)) %>% 
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
@@ -322,11 +338,11 @@ model %>% compile(
 )
 # fit model
 history <- model %>% fit(
-  training, 
+  xtrain, ytrain, 
   epochs = 30, batch_size = 128, 
   validation_split = 0.25
 )
 # Evaluate model performance on the test data:
-model %>% evaluate(testing)
+model %>% evaluate(xtest, ytest)
 ```
 ## Conclusion
