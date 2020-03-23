@@ -223,11 +223,6 @@ study_admissions %>%
 nrow(collect(study_admissions))
 ```
 
-Close the connection to the database:
-```{r}
-dbDisconnect(con)
-```
-
 ### CONSORT Flow Diagrams
 
 ```{r plot}
@@ -262,7 +257,7 @@ box_content[1] = "All admissions in MIMIC-III \n n = 58,976"
 box_content[2] = "Exclude admissions without diagnosis of malignant neoplasm \n n = 41,879" 
 box_content[3] = "Exclude admissions without having MN as the principal diagnosis \n n = 11,894" 
 box_content[4] = "Exclude patients who died in the hospital \n n = 777"
-box_content[5] = "Exclude patients with that were 90 years or older \n n = 119"
+box_content[5] = "Exclude patients who were 90 or older \n n = 119"
 box_content[6] = "Study cohort \n n = 4307"
 
 # adjust the size of boxes to fit content
@@ -286,15 +281,21 @@ for (i in 1:num_of_boxes) {
 
 ## Data Visualization
 
+Visualization is used to summarize the study cohort.
+For the demographic information, one patient could only contribute to the information once. 
+For the other information, one patient could contribute multiple times depending on how many admissions this patient had to the hospital, i.e. admissions were considered independently no matter if they were made by the same patient.
+
+A histogram below shows that the majority was between 40 to 90 years old.
 ```{r}
 study_admissions %>% 
   collect() %>%
   distinct(subject_id, .keep_all = T) %>%
   ggplot(aes(x = age)) + 
   geom_histogram(bins = 100) +
-  labs(x = "Age", title = "Distribution of Age among Patient")
+  labs(x = "Age", title = "Distribution of Age among Patients")
 ```
 
+There were approximately 25% more males than females among the patients.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -306,8 +307,9 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Gender among Patient")
+  labs(title = "Distribution of Gender among Patients")
 ```
+The majority of the patients were White. The proportion of Asian, Black, Hispanic and unknown ethnicity did not differ a lot from each other.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -315,8 +317,9 @@ study_admissions %>%
   ggplot() +
   geom_bar(mapping = aes(x = ethnic_group, fill = ethnic_group)) +
   labs(x = "Ethnic Group", y = "Counts",
-       title = "Distribution of Ethnicity among Patient")
+       title = "Distribution of Ethnicity among Patients")
 ```
+Nearly two thirds of the patients who had malignant neoplasm died within 30 days after discharged.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -328,8 +331,9 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Mortality among Patient")
+  labs(title = "Distribution of 30-Day Mortality among Patients")
 ```
+Among those who had malignant neoplasm, it was the principal diagnosis about 60%.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -340,8 +344,9 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Principal Diagnose among Admissions")
+  labs(title = "Distribution of Principal Diagnosis among Admissions")
 ```
+The severity of level 1 and 3 was more than that of level 2 and 4.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -351,7 +356,7 @@ study_admissions %>%
   labs(x = "Severity Level", y = "Counts",
     title = "Distribution of Severity Level among Admissions")
 ```
-
+The histogram below shows the top 10 actual code corresponding to the diagnosis assigned to the patients.
 ```{r}
 study_admissions %>% 
   collect() %>%
@@ -361,13 +366,13 @@ study_admissions %>%
   slice(2:11) %>%
   ggplot(., aes(x = icd9_code, y = counts)) + 
   geom_bar(stat = 'identity') + 
-  labs(x = "Diagnostics Type",
-       title = "Distribution of Diagnostics Type (Top 10)")
+  labs(x = "Diagnosis Code",
+       title = "Distribution of Diagnosis Code (Top 10) among Admissions")
 ```
 
 ## Analytics
 
-# Split Data into a training and a validation set
+Let's partition the study cohort into two independent sets, approximately 75% for training and 25% for testing:
 ```{r}
 library(ISLR)
 set.seed(123)
@@ -388,7 +393,8 @@ testing %>%
   select(mortality) %>%
   print() -> ytest
 ```
-# Neural Network
+
+### Neural Network
 
 Define a **sequential model** (a linear stack of layers) with 2 fully-connected hidden layers (256 and 128 neurons):
 ```{r}
@@ -423,7 +429,7 @@ Evaluate model performance on the test data:
 model %>% evaluate(xtest, ytest)
 ```
 
-# Logistics Regression
+### Logistics Regression
 
 We fit the same model using keras, since multinomial-logit is just an MLP with (1) one input layer with linear activation and (2) one output layer with softmax link function.
 ```{r}
@@ -456,5 +462,9 @@ Evaluate model performance on the test data:
 mlogit %>% evaluate(xtest, ytest)
 ```
 
+Close the connection to the database:
+```{r}
+dbDisconnect(con)
+```
 
 ## Conclusion
