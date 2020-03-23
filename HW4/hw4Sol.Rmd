@@ -374,6 +374,7 @@ study_admissions %>%
 
 Let's partition the study cohort into two independent sets, approximately 75% for training and 25% for testing:
 ```{r}
+library(keras)
 library(ISLR)
 set.seed(123)
 smp_siz = floor(0.75*nrow(collect(study_admissions)))
@@ -398,14 +399,13 @@ testing %>%
 
 Define a **sequential model** (a linear stack of layers) with 2 fully-connected hidden layers (256 and 128 neurons):
 ```{r}
-library(keras)
 model <- keras_model_sequential() 
 model %>% 
   layer_dense(units = 256, activation = 'relu', input_shape = c(8)) %>% 
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
-  layer_dense(units = 1, activation = 'softmax')
+  layer_dense(units = 10, activation = 'softmax')
 summary(model)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
@@ -438,7 +438,7 @@ mlogit <- keras_model_sequential()
 mlogit %>% 
 #  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
 #  layer_dropout(rate = 0.4) %>% 
-  layer_dense(units = 1, activation = 'softmax', input_shape = c(8))
+  layer_dense(units = 10, activation = 'softmax', input_shape = c(8))
 summary(mlogit)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
