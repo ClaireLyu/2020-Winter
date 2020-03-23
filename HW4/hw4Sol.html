@@ -588,7 +588,7 @@ study_subjects %&gt;%
 </div>
 <div id="analytics" class="section level2">
 <h2>Analytics</h2>
-<p>First convert the study cohort to a numeric matrix:</p>
+<p>First, we convert the study cohort to a numeric matrix:</p>
 <pre class="r"><code>study_admissions_n &lt;- study_admissions
 study_admissions_n$gender[study_admissions_n$gender == &quot;M&quot;] &lt;- 0
 study_admissions_n$gender[study_admissions_n$gender == &quot;F&quot;] &lt;- 1
@@ -598,6 +598,8 @@ study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == &quot;BLACK&q
 study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == &quot;HISPANIC&quot;] &lt;- 2
 study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == &quot;ASIAN&quot;] &lt;- 3
 study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == &quot;UNKNOWN&quot;] &lt;- 4
+# some of the `icd9_code` contain character 'V', 
+# so we eliminate the character to avoid having NA
 study_admissions_n$icd9_code &lt;- as.numeric(gsub(&quot;[a-zA-Z ]&quot;, &quot;&quot;,
                                                 study_admissions_n$icd9_code))
 study_admissions_n$ethnic_group &lt;- as.numeric(study_admissions_n$ethnic_group)
@@ -623,7 +625,7 @@ smp_siz = floor(0.75*nrow(collect(study_admissions_n)))
 train_ind = sample(seq_len(nrow(collect(study_admissions_n))), size = smp_siz)  
 training = collect(study_admissions_n)[train_ind, ] 
 testing = collect(study_admissions_n)[-train_ind, ]</code></pre>
-<p>Then, we convert the x and y into matrix and encode y as binary class matrix. Our x includes <code>age</code>, <code>gender</code>, <code>ethnic_group</code>, <code>principal_dx</code>, <code>icd9_code</code> and <code>drg_severity</code>; our y is <code>mortality</code>:</p>
+<p>Then, we convert the x and y into matrix and encode y as binary class matrix. Our predictors (x) includes <code>age</code>, <code>gender</code>, <code>ethnic_group</code>, <code>principal_dx</code>, <code>icd9_code</code> and <code>drg_severity</code>; our dependent variable (y) is <code>mortality</code>:</p>
 <pre class="r"><code>training %&gt;%
   select(-mortality, -subject_id, -hadm_id) %&gt;%
   as.matrix() %&gt;%
@@ -686,10 +688,10 @@ summary(model)</code></pre>
 <p>Evaluate model performance on the test data:</p>
 <pre class="r"><code>model %&gt;% evaluate(xtest, ytest)</code></pre>
 <pre><code>## $loss
-## [1] 0.6437044
+## [1] 0.6509693
 ## 
 ## $accuracy
-## [1] 0.6573816</code></pre>
+## [1] 0.6610956</code></pre>
 </div>
 <div id="logistics-regression" class="section level3">
 <h3>Logistics Regression</h3>
@@ -726,10 +728,10 @@ summary(mlogit)</code></pre>
 <p>Evaluate model performance on the test data:</p>
 <pre class="r"><code>mlogit %&gt;% evaluate(xtest, ytest)</code></pre>
 <pre><code>## $loss
-## [1] 4.749902
+## [1] 0.7282009
 ## 
 ## $accuracy
-## [1] 0.6118849</code></pre>
+## [1] 0.647168</code></pre>
 <p>Close the connection to the database:</p>
 <pre class="r"><code>dbDisconnect(con)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
@@ -737,7 +739,7 @@ summary(mlogit)</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>Though the predictive accuracies of both approaches change each time we refit the model, neural network always perform better than logistic regression. In addition, it consistently has an accuracy over 0.65. Therefore, we conclude that the set of predictors we selected could attain a predictive accuracy over 65% on predicting the 30-day mortality rate induced by malignant neoplasm by using neural network.</p>
+<p>Though the predictive accuracies of both approaches change each time we refit the model, neural network always perform better than logistic regression. In addition, it consistently has an accuracy over 0.65. Therefore, we conclude that the predictors we selected could attain a predictive accuracy over 65% on predicting the 30-day mortality rate induced by malignant neoplasm by using neural network. It means that based on the information of an independent patient, including <code>age</code>, <code>gender</code>, <code>ethnic_group</code>, <code>principal_dx</code>, <code>icd9_code</code> and <code>drg_severity</code>, we can predict whether this patient died or will die within 30 days after discharge, and the probability that this prediction is correct is above 65% by using neural network.</p>
 </div>
 
 
