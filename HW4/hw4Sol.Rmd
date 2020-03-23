@@ -1,6 +1,5 @@
 ---
-title: "Biostat 203B Homework 4"
-subtitle: Due ~~Mar 20~~ Mar 22 @ 11:59PM
+title: "30-Day Mortality Rate Induced by Malignant Neoplasm"
 output:
   html_document:
     toc: true
@@ -11,14 +10,13 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# 30-Day Mortality Rate Induced by Malignant Neoplasm
 
 ## Introduction
 MIMIC-III (Medical Information Mart for Intensive Care III) is a large, freely-available database comprising deidentified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
 
 The database includes information such as demographics, vital sign measurements made at the bedside (~1 data point per hour), laboratory test results, procedures, medications, caregiver notes, imaging reports, and mortality (both in and out of hospital).
 
-In this project, we want to develop a model for predicting 30-day mortality rate induced by malignant neoplasm. A study cohort from MIMIC-III database is created and potential predictors including severity, principal diagnosis and patient's demographic information are selected. 
+In this project, we study how well the set of predictors, including severity of malignant neoplasm, whether malignant neoplasm was the principal diagnosis, the actual code corresponding to the diagnosis and patient's demographic information, predict the 30-day mortality rate induced by malignant neoplasm. We will use two analytical approaches to address our goal.
 
 ## Data Preparation
 
@@ -33,7 +31,7 @@ library(ggplot2)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
-```{r}
+```{r echo = T, results = 'hide'}
 # Load configuration settings
 dbdriver <- 'PostgreSQL'
 user  <- 'postgres'
@@ -52,22 +50,21 @@ dbExecute(con, paste("SET search_path TO ", schema, sep=" "))
 ```
 
 First, we want to restrict to patients who had malignant neoplasm. We search for string `malignant neoplasm` in the `long_title` of table `d_icd_diagnoses`:
-```{r}
+```{r echo = T, results = 'hide'}
 tbl(con, "d_icd_diagnoses") %>%
   filter(str_detect(tolower(long_title), "malignant neoplasm")) %>%
   print() -> mn_codes
 ```
 
 `diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to malignant neoplasm:
-```{r}
+```{r echo = T, results = 'hide'}
 tbl(con, "diagnoses_icd") %>%
   semi_join(mn_codes, by = "icd9_code") %>%
   print() -> study_admissions
-#nrow(collect(study_admissions))
 ```
 
 MN may not be listed as the principal diagnosis; as explained in [the documentation for the `patients` table](https://mimic.physionet.org/mimictables/diagnoses_icd/), the `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom MN was central to their hospitalization, we will include records with MN in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we limit the query to the first MN diagnosis for each admission:
-```{r}
+```{r echo = T, results = 'hide'}
 study_admissions %>%
   filter(seq_num <= 5) %>%
   group_by(subject_id, hadm_id) %>%
@@ -75,33 +72,28 @@ study_admissions %>%
   ungroup() %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> study_admissions
-#nrow(collect(study_admissions))
 ```
 
 Next, we create a logical variable indicating the MN is the principal diagonosis or not (according to `seq_num`):
-```{r}
+```{r echo = T, results = 'hide'}
 study_admissions %>%
   mutate(principal_dx = seq_num == 1) %>%
   select(-seq_num) %>%
   print() -> study_admissions
-#nrow(collect(study_admissions))
 ```
 
 We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drg severity information and right-join it to our query table:
-```{r}
+```{r echo = T, results = 'hide'}
 tbl(con, "drgcodes") %>%
   filter(str_detect(drg_type, "APR")) %>%
   select(subject_id, hadm_id, drg_severity) %>%
   right_join(study_admissions, by = c("subject_id", "hadm_id")) %>%
   mutate(drg_severity = ifelse(is.na(drg_severity), 1, drg_severity)) %>%
-#  collect() %>%
-#  distinct(subject_id, hadm_id, .keep_all = T) %>%
   print() -> study_admissions
-#  nrow((collect(study_admissions)))
 ```
 
 Pull the admission time `admittime`, discharge time `dischtime`, date of birth `dob`, and date of death `dod`. We are interested in the  mortaility rate 30 days after discharge. So we only keep patients who didn't die in hospital:
-```{r}
+```{r echo = T, results = 'hide'}
 study_admissions %>%
   left_join(
     select(tbl(con, "admissions"),
@@ -114,14 +106,11 @@ study_admissions %>%
     select(tbl(con, "patients"), subject_id, dob, dod),
     by = "subject_id"
   ) %>%
-#  collect() %>%
-#  distinct(subject_id, hadm_id) %>%
   print(width = Inf) -> study_admissions
-#  nrow((collect(study_admissions)))
 ```
 
 To add `age` (at admission) variable into the table. [The documentation for the patients table](https://mimic.physionet.org/mimictables/patients/) explains that patients of 90 years and older had their ages artificially inflated, so we remove these patients from the analysis:
-```{r}
+```{r echo = T, results = 'hide'}
 study_admissions %>%
   mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
   mutate(mortality = ifelse(is.na(tt_death <= 30), FALSE, tt_death <= 30)) %>%
@@ -138,15 +127,12 @@ study_admissions %>%
   )) %>%
   select(-admittime, -dischtime, -dob, -dod, -tt_death) %>%
   select(subject_id, hadm_id, age, mortality, everything()) %>%
-#  collect() %>%
-#  distinct(subject_id, hadm_id) %>%
   print() -> study_admissions
-#  nrow((collect(study_admissions1)))
 ```
 Many mortality indicators are missing, due to neither the hospital database nor the social security database having a record of these patients’ deaths. We convert these to FALSE values. 
 
-Finally, let's merge some demographic information (ethnicity, gender) into our study `study_admissions`:
-```{r}
+Next, let's merge some demographic information (ethnicity, gender) into our study `study_admissions`:
+```{r echo = T, results = 'hide'}
 tbl(con, "admissions") %>%
   select(subject_id, ethnicity) %>%
   distinct() %>%
@@ -162,7 +148,7 @@ study_subjects %>%
 ```
 
 Let's resolves ome diversity and inconsistency in the `ethnicity` field:
-```{r}
+```{r echo = T, results = 'hide'}
 unknown_ethnicity <- c(
   "OTHER",
   "UNABLE TO OBTAIN",
@@ -187,7 +173,7 @@ study_subjects %>%
 ```
 
 Some patients are coded as belonging to more than one ethnic group. To resolve these inconsistencies, we define a helper function to pick the modal value from a vector of values in R, which can be used by the `summarize()` function to choose one ethnic group for each patient:
-```{r}
+```{r echo = T, results = 'hide'}
 most <- function(x) {
   if (all(is.na(x))) return(NA_character_)
   y <- table(x, useNA = "no")
@@ -209,12 +195,12 @@ study_subjects %>%
 ```
 
 Now we add the demographic information `gender` and `ethnicity` into our `study_admissions` table:
-```{r}
+```{r echo = T, results = 'hide'}
 study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
-Eliminate repetitive observations:
+Finally, we eliminate repetitive observations and get our study cohort of size 4307:
 ```{r}
 study_admissions %>%
   collect() %>%
@@ -225,7 +211,7 @@ nrow(collect(study_admissions))
 
 ### CONSORT Flow Diagrams
 
-```{r plot}
+```{r plot, echo = F}
 library(shape)
 library(diagram)
 
@@ -254,14 +240,15 @@ box_pos[6,] = c(0.20, vert_pos[6])
 # content of boxes
 box_content <- matrix(nrow = num_of_boxes, ncol = 1, data = 0)
 box_content[1] = "All admissions in MIMIC-III \n n = 58,976" 
-box_content[2] = "Exclude admissions without diagnosis of malignant neoplasm \n n = 41,879" 
-box_content[3] = "Exclude admissions without having MN as the principal diagnosis \n n = 11,894" 
+box_content[2] = "Exclude admissions without diagnosis \n of malignant neoplasm \n n = 41,879" 
+box_content[3] = "Exclude admissions without having MN \n as the principal diagnosis \n n = 11,894" 
 box_content[4] = "Exclude patients who died in the hospital \n n = 777"
 box_content[5] = "Exclude patients who were 90 or older \n n = 119"
 box_content[6] = "Study cohort \n n = 4307"
 
 # adjust the size of boxes to fit content
 box_x <- c(0.20, 0.25, 0.25, 0.25, 0.25, 0.20)
+#box_x <- c(0.25, 0.3, 0.3, 0.3, 0.3, 0.25)
 box_y <- c(0.07, 0.07, 0.07, 0.07, 0.07, 0.07)
 
 # Draw the arrows
@@ -285,18 +272,21 @@ Visualization is used to summarize the study cohort.
 For the demographic information, one patient could only contribute to the information once. 
 For the other information, one patient could contribute multiple times depending on how many admissions this patient had to the hospital, i.e. admissions were considered independently no matter if they were made by the same patient.
 
-A histogram below shows that the majority was between 40 to 90 years old.
-```{r}
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   distinct(subject_id, .keep_all = T) %>%
   ggplot(aes(x = age)) + 
   geom_histogram(bins = 100) +
-  labs(x = "Age", title = "Distribution of Age among Patients")
+  labs(x = "Age", 
+       title = "Distribution of Age among Patients who had malignant neoplasm",
+       subtitle = "The majority was between 40 to 90 years old.")
 ```
 
-There were approximately 25% more males than females among the patients.
-```{r}
+
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   distinct(subject_id, .keep_all = TRUE) %>%
@@ -307,20 +297,26 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Gender among Patients")
+  labs(title = "Distribution of Gender among Patients",
+       subtitle = "There were approximately 25% more males than females.")
 ```
-The majority of the patients were White. The proportion of Asian, Black, Hispanic and unknown ethnicity did not differ a lot from each other.
-```{r}
+
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   distinct(subject_id, .keep_all = TRUE) %>%
   ggplot() +
   geom_bar(mapping = aes(x = ethnic_group, fill = ethnic_group)) +
   labs(x = "Ethnic Group", y = "Counts",
-       title = "Distribution of Ethnicity among Patients")
+       title = "Distribution of Ethnicity among Patients",
+       subtitle = "The majority of the patients were White. 
+       The proportion of Asian, Black, Hispanic and unknown ethnicity did not 
+       differ a lot from each other.")
 ```
-Nearly two thirds of the patients who had malignant neoplasm died within 30 days after discharged.
-```{r}
+
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   distinct(subject_id, .keep_all = TRUE) %>%
@@ -331,10 +327,13 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of 30-Day Mortality among Patients")
+  labs(title = "Distribution of 30-Day Mortality among Patients",
+       subtitle = "Nearly two thirds of the patients who had malignant neoplasm 
+       died within 30 days after discharged.")
 ```
-Among those who had malignant neoplasm, it was the principal diagnosis about 60%.
-```{r}
+
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   ggplot(mapping = aes(x = principal_dx, 
@@ -344,20 +343,24 @@ study_admissions %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank()) +
   geom_text(stat = 'count', aes(label = ..count.., vjust = -0.2)) +
-  labs(title = "Distribution of Principal Diagnosis among Admissions")
+  labs(title = "Distribution of Principal Diagnosis among Admissions",
+       subtitle = "Among those who had malignant neoplasm, 
+       it was the principal diagnosis about 60% of the time.")
 ```
-The severity of level 1 and 3 was more than that of level 2 and 4.
-```{r}
+
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   ggplot(mapping = aes(x = drg_severity, 
                        fill = drg_severity)) + 
   geom_bar() + 
   labs(x = "Severity Level", y = "Counts",
-    title = "Distribution of Severity Level among Admissions")
+    title = "Distribution of Severity Level among Admissions",
+    subtitle = "The severity of level 1 and 3 was more than that of level 2 and 4.")
 ```
-The histogram below shows the top 10 actual code corresponding to the diagnosis assigned to the patients.
-```{r}
+
+```{r echo = F}
 study_admissions %>% 
   collect() %>%
   group_by(icd9_code) %>%
@@ -372,26 +375,56 @@ study_admissions %>%
 
 ## Analytics
 
-Let's partition the study cohort into two independent sets, approximately 75% for training and 25% for testing:
+First, we convert the study cohort to a numeric matrix:
 ```{r}
+study_admissions_n <- study_admissions
+study_admissions_n$gender[study_admissions_n$gender == "M"] <- 0
+study_admissions_n$gender[study_admissions_n$gender == "F"] <- 1
+study_admissions_n$gender <- as.numeric(study_admissions_n$gender)
+study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == "WHITE"] <- 0
+study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == "BLACK"] <- 1
+study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == "HISPANIC"] <- 2
+study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == "ASIAN"] <- 3
+study_admissions_n$ethnic_group[study_admissions_n$ethnic_group == "UNKNOWN"] <- 4
+# some of the `icd9_code` contain character 'V', 
+# so we eliminate the character to avoid having NA
+study_admissions_n$icd9_code <- as.numeric(gsub("[a-zA-Z ]", "",
+                                                study_admissions_n$icd9_code))
+study_admissions_n$ethnic_group <- as.numeric(study_admissions_n$ethnic_group)
+study_admissions_n$principal_dx <- as.numeric(study_admissions_n$principal_dx)
+study_admissions_n$mortality <- as.numeric(study_admissions_n$mortality)
+study_admissions_n$icd9_code <- as.numeric(study_admissions_n$icd9_code)
+head(study_admissions_n)
+```
+Let's partition the study cohort into two independent sets, approximately 75% for training and 25% for testing:
+```{r echo = T, results = 'hide'}
 library(keras)
 library(ISLR)
 set.seed(123)
-smp_siz = floor(0.75*nrow(collect(study_admissions)))
-train_ind = sample(seq_len(nrow(collect(study_admissions))), size = smp_siz)  
-training = collect(study_admissions)[train_ind, ] 
-testing = collect(study_admissions)[-train_ind, ]
+smp_siz = floor(0.75*nrow(collect(study_admissions_n)))
+train_ind = sample(seq_len(nrow(collect(study_admissions_n))), size = smp_siz)  
+training = collect(study_admissions_n)[train_ind, ] 
+testing = collect(study_admissions_n)[-train_ind, ]
+```
+Then, we convert the x and y into matrix and encode y as binary class matrix. Our predictors (x) includes `age`, `gender`, `ethnic_group`, `principal_dx`, `icd9_code` and `drg_severity`; our dependent variable (y) is `mortality`:
+```{r echo = T, results = 'hide'}
 training %>%
-  select(-mortality) %>%
+  select(-mortality, -subject_id, -hadm_id) %>%
+  as.matrix() %>%
   print() -> xtrain
 training %>%
   select(mortality) %>%
+  as.matrix() %>%
+  to_categorical(2) %>%
   print() -> ytrain
 testing %>%
-  select(-mortality) %>%
+  select(-mortality, -subject_id, -hadm_id) %>%
+  as.matrix() %>%
   print() -> xtest
 testing %>%
   select(mortality) %>%
+  as.matrix() %>%
+  to_categorical(2) %>%
   print() -> ytest
 ```
 
@@ -401,11 +434,11 @@ Define a **sequential model** (a linear stack of layers) with 2 fully-connected 
 ```{r}
 model <- keras_model_sequential() 
 model %>% 
-  layer_dense(units = 256, activation = 'relu', input_shape = c(8)) %>% 
+  layer_dense(units = 256, activation = 'relu', input_shape = c(6)) %>% 
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
-  layer_dense(units = 10, activation = 'softmax')
+  layer_dense(units = 2, activation = 'softmax')
 summary(model)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
@@ -416,7 +449,7 @@ model %>% compile(
   metrics = c('accuracy')
 )
 ```
-Fit the model by using the training data:
+Fit the model by using the train data:
 ```{r}
 history <- model %>% fit(
   xtrain, ytrain, 
@@ -438,7 +471,7 @@ mlogit <- keras_model_sequential()
 mlogit %>% 
 #  layer_dense(units = 256, activation = 'linear', input_shape = c(784)) %>% 
 #  layer_dropout(rate = 0.4) %>% 
-  layer_dense(units = 10, activation = 'softmax', input_shape = c(8))
+  layer_dense(units = 2, activation = 'softmax', input_shape = c(6))
 summary(mlogit)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
@@ -468,3 +501,4 @@ dbDisconnect(con)
 ```
 
 ## Conclusion
+Though the predictive accuracies of both approaches change each time we refit the model, neural network always perform better than logistic regression. In addition, it consistently has an accuracy over 0.65. Therefore, we conclude that the predictors we selected could attain a predictive accuracy over 65% on predicting the 30-day mortality rate induced by malignant neoplasm by using neural network. It means that based on the information of an independent patient, including `age`, `gender`, `ethnic_group`, `principal_dx`, `icd9_code` and `drg_severity`, we can predict whether this patient died or will die within 30 days after discharge, and the probability that this prediction is correct is above 65% by using neural network.
