@@ -26,7 +26,7 @@
     
 -   Q2 (+6 pts)
    
--   Q3 (5/5) Cannot access the shiny app using the provided link. 
+-   Q3 (5/5) 
 
 -   Q4  
 
