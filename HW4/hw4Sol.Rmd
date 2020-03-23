@@ -11,12 +11,14 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-### 30-Day Mortality Rate of Myocardia Infarction Patients
+# 30-Day Mortality Rate Induced by Malignant Neoplasm
 
 ## Introduction
 MIMIC-III (Medical Information Mart for Intensive Care III) is a large, freely-available database comprising deidentified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
 
 The database includes information such as demographics, vital sign measurements made at the bedside (~1 data point per hour), laboratory test results, procedures, medications, caregiver notes, imaging reports, and mortality (both in and out of hospital).
+
+In this project, we want to develop a model for predicting 30-day mortality rate induced by malignant neoplasm. A study cohort from MIMIC-III database is created and potential predictors including severity, principal diagnosis and patient's demographic information are selected. 
 
 ## Data Preparation
 
@@ -49,40 +51,56 @@ con <- dbConnect(RPostgreSQL::PostgreSQL(),
 dbExecute(con, paste("SET search_path TO ", schema, sep=" "))
 ```
 
+First, we want to restrict to patients who had malignant neoplasm. We search for string `malignant neoplasm` in the `long_title` of table `d_icd_diagnoses`:
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
-  filter(str_detect(tolower(long_title), "tuberculo")) %>%
-  print() -> tuber_codes
+  filter(str_detect(tolower(long_title), "malignant neoplasm")) %>%
+  print() -> mn_codes
 ```
 
+`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to malignant neoplasm:
 ```{r}
 tbl(con, "diagnoses_icd") %>%
-  semi_join(tuber_codes, by = "icd9_code") %>%
+  semi_join(mn_codes, by = "icd9_code") %>%
+  print() -> study_admissions
+#nrow(collect(study_admissions))
+```
+
+MN may not be listed as the principal diagnosis; as explained in [the documentation for the `patients` table](https://mimic.physionet.org/mimictables/diagnoses_icd/), the `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom MN was central to their hospitalization, we will include records with MN in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we limit the query to the first MN diagnosis for each admission:
+```{r}
+study_admissions %>%
   filter(seq_num <= 5) %>%
   group_by(subject_id, hadm_id) %>%
   filter(min_rank(seq_num) <= 1) %>%
   ungroup() %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> study_admissions
+#nrow(collect(study_admissions))
 ```
 
-
+Next, we create a logical variable indicating the MN is the principal diagonosis or not (according to `seq_num`):
 ```{r}
 study_admissions %>%
   mutate(principal_dx = seq_num == 1) %>%
   select(-seq_num) %>%
   print() -> study_admissions
+#nrow(collect(study_admissions))
 ```
 
+We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drg severity information and right-join it to our query table:
 ```{r}
 tbl(con, "drgcodes") %>%
   filter(str_detect(drg_type, "APR")) %>%
   select(subject_id, hadm_id, drg_severity) %>%
   right_join(study_admissions, by = c("subject_id", "hadm_id")) %>%
   mutate(drg_severity = ifelse(is.na(drg_severity), 1, drg_severity)) %>%
+#  collect() %>%
+#  distinct(subject_id, hadm_id, .keep_all = T) %>%
   print() -> study_admissions
+#  nrow((collect(study_admissions)))
 ```
 
+Pull the admission time `admittime`, discharge time `dischtime`, date of birth `dob`, and date of death `dod`. We are interested in the  mortaility rate 30 days after discharge. So we only keep patients who didn't die in hospital:
 ```{r}
 study_admissions %>%
   left_join(
@@ -96,9 +114,13 @@ study_admissions %>%
     select(tbl(con, "patients"), subject_id, dob, dod),
     by = "subject_id"
   ) %>%
+#  collect() %>%
+#  distinct(subject_id, hadm_id) %>%
   print(width = Inf) -> study_admissions
+#  nrow((collect(study_admissions)))
 ```
 
+To add `age` (at admission) variable into the table. [The documentation for the patients table](https://mimic.physionet.org/mimictables/patients/) explains that patients of 90 years and older had their ages artificially inflated, so we remove these patients from the analysis:
 ```{r}
 study_admissions %>%
   mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
@@ -116,9 +138,14 @@ study_admissions %>%
   )) %>%
   select(-admittime, -dischtime, -dob, -dod, -tt_death) %>%
   select(subject_id, hadm_id, age, mortality, everything()) %>%
+#  collect() %>%
+#  distinct(subject_id, hadm_id) %>%
   print() -> study_admissions
+#  nrow((collect(study_admissions1)))
 ```
+Many mortality indicators are missing, due to neither the hospital database nor the social security database having a record of these patients’ deaths. We convert these to FALSE values. 
 
+Finally, let's merge some demographic information (ethnicity, gender) into our study `study_admissions`:
 ```{r}
 tbl(con, "admissions") %>%
   select(subject_id, ethnicity) %>%
@@ -134,6 +161,7 @@ study_subjects %>%
   print() -> study_subjects
 ```
 
+Let's resolves ome diversity and inconsistency in the `ethnicity` field:
 ```{r}
 unknown_ethnicity <- c(
   "OTHER",
@@ -158,6 +186,7 @@ study_subjects %>%
   print() -> study_subjects
 ```
 
+Some patients are coded as belonging to more than one ethnic group. To resolve these inconsistencies, we define a helper function to pick the modal value from a vector of values in R, which can be used by the `summarize()` function to choose one ethnic group for each patient:
 ```{r}
 most <- function(x) {
   if (all(is.na(x))) return(NA_character_)
@@ -179,15 +208,80 @@ study_subjects %>%
   print() -> study_subjects
 ```
 
+Now we add the demographic information `gender` and `ethnicity` into our `study_admissions` table:
 ```{r}
 study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
+Eliminate repetitive observations:
 ```{r}
 study_admissions %>%
-  distinct(.keep_all = T) %>%
+  collect() %>%
+  distinct(subject_id, hadm_id, .keep_all = T) %>%
   print() -> study_admissions
+nrow(collect(study_admissions))
+```
+
+Close the connection to the database:
+```{r}
+dbDisconnect(con)
+```
+
+### CONSORT Flow Diagrams
+
+```{r plot}
+library(shape)
+library(diagram)
+
+# set margins and multiplot
+par(mfrow = c(1, 1))
+par(mar = c(0, 0, 0, 0))
+
+# initialise a plot device
+openplotmat()
+
+# position of boxes
+# 1st column indicates x axis position between 0 and 1
+# 2nd column indicates y axis position between 0 and 1
+# automatically assigns vertical position
+num_of_boxes <- 6
+auto_coords = coordinates(num_of_boxes)
+vert_pos = rev(auto_coords[,1])
+box_pos <- matrix(nrow = num_of_boxes, ncol = 2, data = 0)
+box_pos[1,] = c(0.20, vert_pos[1]) # 1st box
+box_pos[2,] = c(0.70, vert_pos[2]) # 2nd box
+box_pos[3,] = c(0.70, vert_pos[3]) # 3rd box
+box_pos[4,] = c(0.70, vert_pos[4]) # etc...
+box_pos[5,] = c(0.70, vert_pos[5])
+box_pos[6,] = c(0.20, vert_pos[6])
+
+# content of boxes
+box_content <- matrix(nrow = num_of_boxes, ncol = 1, data = 0)
+box_content[1] = "All admissions in MIMIC-III \n n = 58,976" 
+box_content[2] = "Exclude admissions without diagnosis of malignant neoplasm \n n = 41,879" 
+box_content[3] = "Exclude admissions without having MN as the principal diagnosis \n n = 11,894" 
+box_content[4] = "Exclude patients who died in the hospital \n n = 777"
+box_content[5] = "Exclude patients with that were 90 years or older \n n = 119"
+box_content[6] = "Study cohort \n n = 4307"
+
+# adjust the size of boxes to fit content
+box_x <- c(0.20, 0.25, 0.25, 0.25, 0.25, 0.20)
+box_y <- c(0.07, 0.07, 0.07, 0.07, 0.07, 0.07)
+
+# Draw the arrows
+straightarrow(from = c(box_pos[1,1],box_pos[2,2]), to = box_pos[2,], lwd = 1)  
+straightarrow(from = c(box_pos[1,1],box_pos[3,2]), to = box_pos[3,], lwd = 1)  
+straightarrow(from = c(box_pos[1,1],box_pos[4,2]), to = box_pos[4,], lwd = 1)  
+straightarrow(from = c(box_pos[1,1],box_pos[5,2]), to = box_pos[5,], lwd = 1)  
+straightarrow(from = box_pos[1,], to = box_pos[6,], lwd = 1)
+
+# Draw the boxes
+for (i in 1:num_of_boxes) {
+  textrect(mid = box_pos[i,], radx = box_x[i], rady = box_y[i], 
+           lab = box_content[i], 
+           shadow.col = "grey")
+  }
 ```
 
 ## Data Visualization
@@ -305,7 +399,7 @@ model %>%
   layer_dropout(rate = 0.4) %>% 
   layer_dense(units = 128, activation = 'relu') %>%
   layer_dropout(rate = 0.3) %>%
-  layer_dense(units = 2, activation = 'softmax')
+  layer_dense(units = 1, activation = 'softmax')
 summary(model)
 ```
 Compile the model with appropriate loss function, optimizer, and metrics:
@@ -320,7 +414,7 @@ Fit the model by using the training data:
 ```{r}
 history <- model %>% fit(
   xtrain, ytrain, 
-  epochs = 15, batch_size = 128, 
+  epochs = 30, batch_size = 128, 
   validation_split = 0.2
 )
 ```
