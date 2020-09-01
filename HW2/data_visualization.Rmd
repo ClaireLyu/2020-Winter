@@ -1,5 +1,5 @@
 ---
-title: "Biostat 203B Homework 2"
+title: "Data Visualization Project"
 subtitle: Due Feb 7 @ 11:59PM
 author: "Yuetong Lyu"
 output: 
@@ -15,9 +15,9 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 sessionInfo()
 ```
 
-Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-III](https://mimic.physionet.org) data introduced in [homework 1](https://ucla-biostat203b-2020winter.github.io/hw/hw1/hw1.html).
+Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-III](https://mimic.physionet.org) data.
 
-## Q1
+## Part 1
 
 Demographic information of the patients admitted into hospital is available in `ADMISSION.csv`. See <https://mimic.physionet.org/mimictables/admissions/> for details of each field in this file. Summarize following variables using appropriate graphs:   
 
@@ -37,8 +37,6 @@ Demographic information of the patients admitted into hospital is available in `
 - death 
 
 Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on only unique patients. 
-
-**Solution**
 
 ### Prerequisites
 
@@ -267,14 +265,12 @@ admission %>%
 ```
 
 
-## Q2
+## Part 2
 
 Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.org/mimictables/patients/>) and summarize following variables using appropriate graphs:  
 
 - gender  
 - age at admission 
-
-**Solution**
 
 First, I'd like to link the 'ADMISSIONS.csv' and 'PATIENTS.csv' together.
 
@@ -319,7 +315,7 @@ aP %>%
        obscure their age and comply with HIPAA.")
 ```
 
-## Q3
+## Part 3
 
 `ICUSTAYS.csv` (<https://mimic.physionet.org/mimictables/icustays/>) contains data about Intensive Care Units (ICU) stays. Summarize following variables using appropriate graphs:  
 
@@ -328,7 +324,6 @@ aP %>%
 - gender  
 - age  
 
-**Solution**
 First, parse the 'ICUSTAYS.csv' data.
 ```{r}
 ICU <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
@@ -395,15 +390,13 @@ iP %>%
        obscure their age and comply with HIPAA.")
 ```
 
-## Q4 
+## Part 4 
 
 ### Potential Values of ITEMID that Correspond to 'Systolic'
 
 `CHARTEVENTS.csv` (<https://mimic.physionet.org/mimictables/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `ITEMID` variable indicates a single measurement type in the database. The `VALUE` variable is the value measured for `ITEMID`. 
 
 `D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
-
-**Solution**
 
 First parse the data:
 ```{r}
@@ -420,8 +413,6 @@ sys_ID
 ### Tibble
 
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
-
-**Solution**
 
 I will first get the value of first systolic blood pressure measurement (VALUE) and save it as well as the corresponding SUBJECT_ID temporarily. To do this, since I have known the ITEMIDs that are related to 'Systolic', I could find patients who had systolic blood pressure measured (maybe multiple times) and get the value of the first measurement by looking at the earliest recorded time when the observation was made. As demonstrated in the table below, there were only 428 patients who had their systolic blood pressure measured. Accordingly, after I link this table to the ICU table, VALUE may contain a lot of NAs.
 
