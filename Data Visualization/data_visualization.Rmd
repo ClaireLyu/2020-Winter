@@ -1,5 +1,5 @@
 ---
-title: "Data Visualization Project"
+title: "Data Visualization for Patient Health Record Database"
 subtitle: Due Feb 7 @ 11:59PM
 author: "Yuetong Lyu"
 output: 
@@ -50,14 +50,14 @@ library(lubridate)
 
 First, try to parse the data:
 ```{r}
-admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+admission <- read_csv("/mimic-iii/ADMISSIONS.csv")
 admission %>% print(width = Inf)
 ```
 
 Everything looks fine except that I'd like to enforce 'ROW_ID', 'SUBJECT_ID', 'HADM_ID', to be `<int>` and 'HOSPITAL_EXPIRE_FLAG' and 'HAS_CHARTEVENTS_DATA' to be `<lgl>`:
 
 ```{r}
-admission <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv",
+admission <- read_csv("/mimic-iii/ADMISSIONS.csv",
                       col_types = cols(ROW_ID = col_integer(),
                                        SUBJECT_ID = col_integer(),
                                        HADM_ID = col_integer(),
